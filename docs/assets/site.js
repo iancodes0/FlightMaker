@@ -41,9 +41,29 @@ const setupAuth = async () => {
   }
   const session = getSession();
   document.querySelectorAll("[data-sign-in]").forEach((button) => {
-    button.textContent = session ? `Signed in as ${session.user.username}` : "Sign in";
+    if (session) {
+      button.textContent = "";
+      button.classList.add("profile-chip");
+      const avatar = document.createElement("img");
+      avatar.src = session.user.avatarUrl;
+      avatar.alt = `${session.user.username}'s Discord avatar`;
+      avatar.width = 24;
+      avatar.height = 24;
+      const username = document.createElement("span");
+      username.textContent = session.user.username;
+      button.append(avatar, username);
+    } else {
+      button.textContent = "Sign in";
+    }
     button.href = session ? "#" : DISCORD_SIGN_IN_URL;
-    if (session) button.addEventListener("click", () => sessionStorage.removeItem("ptfs-session"));
+    if (session) {
+      button.setAttribute("aria-label", "Sign out");
+      button.addEventListener("click", (event) => {
+        event.preventDefault();
+        sessionStorage.removeItem("ptfs-session");
+        window.location.reload();
+      });
+    }
   });
   return session;
 };

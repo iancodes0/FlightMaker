@@ -118,7 +118,14 @@ const server = http.createServer(async (request, response) => {
       });
       return send(response, 200, {
         token: createSession(user),
-        user: { id: user.id, username: user.global_name || user.username, isStaff: STAFF_IDS.has(user.id) },
+        user: {
+          id: user.id,
+          username: user.global_name || user.username,
+          avatarUrl: user.avatar
+            ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`
+            : "https://cdn.discordapp.com/embed/avatars/0.png",
+          isStaff: STAFF_IDS.has(user.id),
+        },
       }, origin);
     }
     if (request.method === "POST" && url.pathname === "/api/bookings") {
