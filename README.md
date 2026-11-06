@@ -57,6 +57,9 @@ as `welcome-card.png`; no profile pictures are stored by the bot.
   title, description, location, start, and end as `MM/DD/YYYY h:mm AM/PM` (UTC);
   an image URL can be supplied optionally on the command. The creator needs the
   **Manage Events** permission.
+- `/giverole user:<user> role:<role>` — Gives a role to a server member. This
+  command is restricted to the two configured authorized users, and the bot
+  needs **Manage Roles** with its highest role above the role being assigned.
 - `/rules` — Sends the United Airlines PTFS rules as a private cyan embed.
 - `/ticket` — Creates a private support ticket without using the ticket-panel button.
 

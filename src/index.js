@@ -260,6 +260,21 @@ const eventCommand = new SlashCommandBuilder()
       .setRequired(false)
   );
 
+const giveRoleCommand = new SlashCommandBuilder()
+  .setName("giverole")
+  .setDescription("Give a role to a server member.")
+  .addUserOption((option) =>
+    option.setName("user").setDescription("The member who should receive the role.").setRequired(true)
+  )
+  .addRoleOption((option) =>
+    option.setName("role").setDescription("The role to give.").setRequired(true)
+  );
+
+const ROLE_COMMAND_AUTHORIZED_USER_IDS = new Set([
+  "1420191498988814377",
+  "1388554248144293919",
+]);
+
 const TICKET_PANEL_CHANNEL_ID = "1567000517283020844";
 const TICKET_PANEL_CUSTOM_ID = "ticket:create";
 const TICKET_CLOSE_CUSTOM_ID = "ticket:close";
@@ -559,11 +574,12 @@ client.once(Events.ClientReady, (readyClient) => {
       editFlightCommand.toJSON(),
       removeFlightCommand.toJSON(),
       eventCommand.toJSON(),
+      giveRoleCommand.toJSON(),
       new SlashCommandBuilder().setName("rules").setDescription("Show the United Airlines PTFS rules.").toJSON(),
       new SlashCommandBuilder().setName("ticket").setDescription("Create a private support ticket.").toJSON(),
     ])
     .then(() =>
-      console.log("Registered global commands: /united, /announce, /announce2, /announce3, /editflight, /removeflight, /event, /rules, /ticket.")
+      console.log("Registered global commands: /united, /announce, /announce2, /announce3, /editflight, /removeflight, /event, /giverole, /rules, /ticket.")
     )
     .catch((error) => console.error("Failed to register slash commands:", error));
   ensureTicketPanel().catch((error) => {
@@ -628,6 +644,48 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   if (interaction.commandName === "rules") {
     await interaction.reply({ embeds: [rulesEmbed()], ephemeral: true });
+    return;
+  }
+
+  if (interaction.commandName === "giverole") {
+    if (!ROLE_COMMAND_AUTHORIZED_USER_IDS.has(interaction.user.id)) {
+      await interaction.reply({ content: "You are not authorized to use this command.", ephemeral: true });
+      return;
+    }
+    if (!interaction.guild) {
+      await interaction.reply({ content: "Roles can only be assigned in a server.", ephemeral: true });
+      return;
+    }
+
+    const targetUser = interaction.options.getUser("user", true);
+    const role = interaction.options.getRole("role", true);
+    const botMember = interaction.guild.members.me;
+    if (!botMember?.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
+      await interaction.reply({ content: "I need the Manage Roles permission to assign roles.", ephemeral: true });
+      return;
+    }
+    if (role.managed || role.position >= botMember.roles.highest.position) {
+      await interaction.reply({
+        content: "I cannot assign that role because it is managed or higher than my highest role.",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    try {
+      const targetMember = await interaction.guild.members.fetch(targetUser.id);
+      await targetMember.roles.add(role, `Assigned by ${interaction.user.tag}`);
+      await interaction.reply({
+        content: `Assigned ${role} to ${targetMember}.`,
+        ephemeral: true,
+      });
+    } catch (error) {
+      console.error(`Failed to assign role ${role.name} to ${targetUser.tag}:`, error);
+      await interaction.reply({
+        content: "I could not assign that role. Check the member and role permissions.",
+        ephemeral: true,
+      });
+    }
     return;
   }
 
