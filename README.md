@@ -82,6 +82,9 @@ The bot also maintains a support-ticket panel in Discord channel
 `1567000517283020844`. Users can click **Create Support Ticket** to open one
 private support channel, which includes a close button and an `@everyone`
 notification identifying the user who created it.
+Set `TICKET_PANEL_CHANNEL_ID` to a channel the bot can access if this default
+channel is unavailable. The bot will still start and all other commands will
+remain available when the panel channel cannot be accessed.
 
 The commands are registered globally automatically when the bot connects, so
 they are available in every server where the bot is installed. Discord may take

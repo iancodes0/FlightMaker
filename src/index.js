@@ -32,6 +32,7 @@ if (!token) {
 
 const FLIGHTS_FILE = path.join(__dirname, "..", "data", "flights.json");
 const WELCOME_CHANNEL_ID = "1568359911425974513";
+const TICKET_PANEL_CHANNEL_ID = process.env.TICKET_PANEL_CHANNEL_ID || "1567000517283020844";
 const WELCOME_LOGO_FILE = path.join(
   __dirname,
   "..",
@@ -291,7 +292,6 @@ const ROLE_COMMAND_AUTHORIZED_USER_IDS = new Set([
   "1388554248144293919",
 ]);
 
-const TICKET_PANEL_CHANNEL_ID = "1567000517283020844";
 const TICKET_PANEL_CUSTOM_ID = "ticket:create";
 const TICKET_CLOSE_CUSTOM_ID = "ticket:close";
 const pendingEventImages = new Map();
@@ -339,7 +339,18 @@ const ticketPanel = () => ({
 });
 
 const ensureTicketPanel = async () => {
-  const channel = await client.channels.fetch(TICKET_PANEL_CHANNEL_ID);
+  const channel = await client.channels.fetch(TICKET_PANEL_CHANNEL_ID).catch((error) => {
+    if (error.code === 50001 || error.code === 10003) {
+      console.warn(
+        `Skipping ticket panel: the bot cannot access channel ${TICKET_PANEL_CHANNEL_ID}.`
+      );
+      return null;
+    }
+    throw error;
+  });
+  if (!channel) {
+    return;
+  }
   if (!channel?.isTextBased() || !channel.messages) {
     throw new Error(`Ticket panel channel ${TICKET_PANEL_CHANNEL_ID} is not a text channel.`);
   }
