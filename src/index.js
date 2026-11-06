@@ -23,10 +23,10 @@ const {
   TextInputStyle,
 } = require("discord.js");
 
-const token = process.env.DISCORD_TOKEN;
+const token = process.env.TURKISH_TOKEN || process.env.DISCORD_TOKEN;
 
 if (!token) {
-  console.error("Missing DISCORD_TOKEN. Add it to a .env file before starting the bot.");
+  console.error("Missing TURKISH_TOKEN or DISCORD_TOKEN. Add one to the service variables before starting the bot.");
   process.exit(1);
 }
 

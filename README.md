@@ -21,8 +21,10 @@ before enabling bookings or staff access.
 2. Copy `.env.example` to `.env` and replace the placeholder with your bot token:
 
    ```env
-   DISCORD_TOKEN=your-bot-token-here
+   TURKISH_TOKEN=your-turkish-bot-token-here
    ```
+
+   `DISCORD_TOKEN` is supported as a fallback for older deployments.
 
 3. Enable the **Server Members Intent** for the bot in the Discord Developer Portal.
 
@@ -121,7 +123,8 @@ Keep the token in `/etc/flightmaker/flightmaker.env`; do not commit it to Git.
 ## Deploy with Railway
 
 1. Create a Railway project from this repository.
-2. Add the variable `DISCORD_TOKEN` in the service's **Variables** settings.
+2. Add the variable `TURKISH_TOKEN` in the service's **Variables** settings.
+   `DISCORD_TOKEN` remains supported as a fallback for older deployments.
 3. Deploy the service. Railway uses [`railway.json`](railway.json) and runs `npm start`.
 
 The service is configured to restart after failed exits. Railway's local filesystem is
