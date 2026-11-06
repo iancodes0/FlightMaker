@@ -53,6 +53,7 @@ as `welcome-card.png`; no profile pictures are stored by the bot.
 ## Commands
 
 - `/united` — Shows a clean information card about United Airlines, including its global network, travel experiences, and helpful links.
+- `/about` — Explains Turkish Airlines PTFS and its goal of reflecting the spirit of the real airline.
 - `/announce` — Posts a PTFS flight announcement with destinations, flight number,
   schedule, crew, operations, and a selectable PTFS aircraft. The flight engineer
   field is not included.

@@ -584,6 +584,10 @@ client.once(Events.ClientReady, (readyClient) => {
         .setName("united")
         .setDescription("Learn more about United Airlines.")
         .toJSON(),
+      new SlashCommandBuilder()
+        .setName("about")
+        .setDescription("Learn about Turkish Airlines PTFS.")
+        .toJSON(),
       announceCommand.toJSON(),
       announce2Command.toJSON(),
       announce3Command.toJSON(),
@@ -595,7 +599,7 @@ client.once(Events.ClientReady, (readyClient) => {
       new SlashCommandBuilder().setName("ticket").setDescription("Create a private support ticket.").toJSON(),
     ])
     .then(() =>
-      console.log("Registered global commands: /united, /announce, /announce2, /announce3, /editflight, /removeflight, /event, /giverole, /rules, /ticket.")
+      console.log("Registered global commands: /united, /about, /announce, /announce2, /announce3, /editflight, /removeflight, /event, /giverole, /rules, /ticket.")
     )
     .catch((error) => console.error("Failed to register slash commands:", error));
   ensureTicketPanel().catch((error) => {
@@ -660,6 +664,21 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
   if (interaction.commandName === "rules") {
     await interaction.reply({ embeds: [rulesEmbed()], ephemeral: true });
+    return;
+  }
+
+  if (interaction.commandName === "about") {
+    await interaction.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setColor(0xc8102e)
+          .setTitle("About Turkish Airlines PTFS")
+          .setDescription(
+            "Turkish Airlines PTFS is a virtual airline built for pilots, crew, and aviation fans who enjoy realistic and welcoming flight operations. We connect our community through scheduled flights, organized events, and a shared passion for exploring the virtual skies. Every flight is an opportunity to make the journey memorable for our passengers and our team.\n\nOur goal is to reflect the spirit of the real Turkish Airlines through professional service, global ambition, and genuine hospitality. We strive to offer the same care, consistency, and attention to detail that travelers associate with the actual airline while creating an experience made for the PTFS community. Together, we are building a virtual airline that feels authentic, inclusive, and ready for takeoff."
+          )
+          .setFooter({ text: "Turkish Airlines PTFS • We fly together" }),
+      ],
+    });
     return;
   }
 
