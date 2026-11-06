@@ -3,9 +3,9 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="FlightMaker is a Discord bot for welcoming members, announcing flights, and managing support tickets.">
-    <meta name="theme-color" content="#07111f">
-    <title>FlightMaker | Discord aviation tools</title>
+    <meta name="description" content="Turkish Airlines TFS is a Discord aviation community powered by FlightMaker.">
+    <meta name="theme-color" content="#c8102e">
+    <title>Turkish Airlines TFS | Fly beyond</title>
     <style>
       :root {
         color-scheme: dark;
@@ -13,8 +13,9 @@
         --muted: #9db1c7;
         --line: rgba(157, 177, 199, .2);
         --panel: rgba(14, 30, 50, .72);
-        --blue: #66d9ff;
-        --violet: #9b8cff;
+        --red: #c8102e;
+        --coral: #ff526d;
+        --gold: #f5c451;
         --bg: #07111f;
       }
 
@@ -24,8 +25,8 @@
         margin: 0;
         color: var(--ink);
         background:
-          radial-gradient(circle at 85% 5%, rgba(102, 217, 255, .16), transparent 30rem),
-          radial-gradient(circle at 5% 30%, rgba(155, 140, 255, .12), transparent 28rem),
+          radial-gradient(circle at 85% 5%, rgba(200, 16, 46, .22), transparent 30rem),
+          radial-gradient(circle at 5% 30%, rgba(245, 196, 81, .1), transparent 28rem),
           var(--bg);
         font: 16px/1.6 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
@@ -37,14 +38,14 @@
       .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -.03em; }
       .mark {
         display: grid; place-items: center; width: 42px; height: 42px; border-radius: 14px;
-        color: #06101d; background: linear-gradient(135deg, var(--blue), var(--violet));
-        box-shadow: 0 0 30px rgba(102, 217, 255, .25);
+        color: #fff; background: linear-gradient(135deg, var(--red), var(--coral));
+        box-shadow: 0 0 30px rgba(200, 16, 46, .35);
       }
       .nav-links { display: flex; gap: 24px; color: var(--muted); font-size: .94rem; }
       .nav-links a { text-decoration: none; }
       .nav-links a:hover { color: var(--ink); }
       .hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 64px; align-items: center; padding: 92px 0 110px; }
-      .eyebrow { color: var(--blue); font-size: .78rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+      .eyebrow { color: var(--coral); font-size: .78rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
       h1 { max-width: 700px; margin: 14px 0 22px; font-size: clamp(3.2rem, 8vw, 6.7rem); line-height: .96; letter-spacing: -.075em; }
       .lead { max-width: 600px; color: var(--muted); font-size: 1.15rem; }
       .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
@@ -52,30 +53,30 @@
         display: inline-flex; align-items: center; justify-content: center; padding: 12px 18px;
         border: 1px solid var(--line); border-radius: 12px; text-decoration: none; font-weight: 700;
       }
-      .button.primary { color: #06101d; border-color: transparent; background: var(--blue); }
+      .button.primary { color: #fff; border-color: transparent; background: var(--red); }
       .button:hover { transform: translateY(-2px); }
       .flight-card {
         position: relative; overflow: hidden; padding: 26px; border: 1px solid var(--line);
-        border-radius: 26px; background: linear-gradient(145deg, rgba(102, 217, 255, .12), var(--panel));
+        border-radius: 26px; background: linear-gradient(145deg, rgba(200, 16, 46, .18), var(--panel));
         box-shadow: 0 24px 80px rgba(0, 0, 0, .28);
       }
       .flight-card::after {
         content: ""; position: absolute; width: 170px; height: 170px; right: -60px; top: -60px;
-        border: 1px solid rgba(102, 217, 255, .3); border-radius: 50%;
-        box-shadow: 0 0 0 24px rgba(102, 217, 255, .04), 0 0 0 48px rgba(102, 217, 255, .03);
+        border: 1px solid rgba(245, 196, 81, .3); border-radius: 50%;
+        box-shadow: 0 0 0 24px rgba(245, 196, 81, .04), 0 0 0 48px rgba(245, 196, 81, .03);
       }
       .card-top, .route, .card-bottom { display: flex; justify-content: space-between; gap: 16px; }
       .card-top, .card-bottom { color: var(--muted); font-size: .83rem; }
       .route { align-items: end; padding: 60px 0 48px; }
       .airport { font-size: 2.8rem; font-weight: 800; letter-spacing: -.08em; }
-      .line { flex: 1; height: 1px; margin-bottom: 15px; background: linear-gradient(90deg, var(--blue), var(--violet)); }
+      .line { flex: 1; height: 1px; margin-bottom: 15px; background: linear-gradient(90deg, var(--red), var(--gold)); }
       section { padding: 50px 0 100px; }
       .section-heading { max-width: 650px; margin-bottom: 28px; }
       h2 { margin: 0 0 10px; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1; letter-spacing: -.055em; }
       .section-heading p { color: var(--muted); }
       .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
       .feature { min-height: 190px; padding: 24px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
-      .icon { color: var(--blue); font-size: 1.4rem; }
+      .icon { color: var(--coral); font-size: 1.4rem; }
       h3 { margin: 12px 0 7px; font-size: 1.12rem; }
       .feature p { margin: 0; color: var(--muted); font-size: .94rem; }
       .commands { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -96,7 +97,7 @@
         <nav aria-label="Main navigation">
           <a class="brand" href="#">
             <span class="mark" aria-hidden="true">✈</span>
-            <span>FlightMaker</span>
+            <span>Turkish Airlines TFS</span>
           </a>
           <div class="nav-links">
             <a href="#features">Features</a>
@@ -110,39 +111,39 @@
     <main>
       <section class="shell hero">
         <div>
-          <div class="eyebrow">Discord aviation tools</div>
-          <h1>Make every flight feel official.</h1>
-          <p class="lead">FlightMaker keeps your aviation community moving with polished announcements, welcoming experiences, scheduled events, and private support.</p>
+          <div class="eyebrow">Turkish Airlines TFS</div>
+          <h1>Fly beyond the ordinary.</h1>
+          <p class="lead">Welcome to the Turkish Airlines TFS community: a place for realistic flights, polished operations, and memorable journeys across the virtual skies.</p>
           <div class="actions">
-            <a class="button primary" href="https://github.com/iancodes0/FlightMaker">View on GitHub</a>
-            <a class="button" href="#commands">Explore commands</a>
+            <a class="button primary" href="https://github.com/iancodes0/FlightMaker">Explore our community</a>
+            <a class="button" href="#features">Discover TFS</a>
           </div>
         </div>
         <div class="flight-card" aria-label="Example flight card">
-          <div class="card-top"><span>FLIGHTMAKER AIR</span><span>UA-ABC123</span></div>
-          <div class="route"><span class="airport">ORD</span><span class="line" aria-hidden="true"></span><span class="airport">LHR</span></div>
-          <div class="card-bottom"><span>United Airlines PTFS</span><span>ON TIME</span></div>
+          <div class="card-top"><span>TURKISH AIRLINES TFS</span><span>TK-ABC123</span></div>
+          <div class="route"><span class="airport">IST</span><span class="line" aria-hidden="true"></span><span class="airport">JFK</span></div>
+          <div class="card-bottom"><span>Turkish Airlines TFS</span><span>ON TIME</span></div>
         </div>
       </section>
 
       <section id="features" class="shell">
         <div class="section-heading">
-          <div class="eyebrow">Built for your server</div>
-          <h2>Everything your flight community needs.</h2>
-          <p>One focused Discord bot for the moments between boarding and landing.</p>
+          <div class="eyebrow">The TFS experience</div>
+          <h2>Connect continents. Create memories.</h2>
+          <p>From Istanbul to the world, Turkish Airlines TFS brings the spirit of aviation to every community flight.</p>
         </div>
         <div class="grid">
-          <article class="feature"><div class="icon">✦</div><h3>Welcome in style</h3><p>Automatically greet new members with a generated welcome card and their current avatar.</p></article>
-          <article class="feature"><div class="icon">↗</div><h3>Announce clearly</h3><p>Create rich PTFS and Project Flight announcements with crews, schedules, aircraft, and destinations.</p></article>
-          <article class="feature"><div class="icon">▣</div><h3>Support passengers</h3><p>Give members a private ticket flow with a clean panel and one-click closing.</p></article>
+          <article class="feature"><div class="icon">✦</div><h3>Turkish hospitality</h3><p>Welcome every passenger with the warmth, care, and character of Turkish Airlines.</p></article>
+          <article class="feature"><div class="icon">↗</div><h3>Global network</h3><p>Plan and announce realistic TFS flights connecting Istanbul with destinations worldwide.</p></article>
+          <article class="feature"><div class="icon">▣</div><h3>Always connected</h3><p>Meet fellow aviation fans, coordinate operations, and keep every journey running smoothly.</p></article>
         </div>
       </section>
 
       <section id="commands" class="shell">
         <div class="section-heading">
-          <div class="eyebrow">Command deck</div>
-          <h2>Ready for departure.</h2>
-          <p>Commands are registered globally and available wherever FlightMaker is installed.</p>
+          <div class="eyebrow">Operations center</div>
+          <h2>Your journey starts here.</h2>
+          <p>Our Discord operations are powered by FlightMaker, keeping Turkish Airlines TFS organized from boarding to arrival.</p>
         </div>
         <div class="commands">
           <code>/announce</code><code>/announce2</code><code>/announce3</code><code>/event</code>
@@ -153,8 +154,8 @@
 
     <footer>
       <div class="shell">
-        <span>© 2026 FlightMaker</span>
-        <a href="https://github.com/iancodes0/FlightMaker">Open source on GitHub →</a>
+        <span>© 2026 Turkish Airlines TFS</span>
+        <a href="https://github.com/iancodes0/FlightMaker">TFS operations on GitHub →</a>
       </div>
     </footer>
   </body>
