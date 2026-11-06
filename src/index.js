@@ -1,4 +1,5 @@
 require("dotenv").config();
+require("./web-api");
 
 const fs = require("node:fs");
 const path = require("node:path");

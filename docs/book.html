@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07090d">
+    <link rel="icon" type="image/png" href="assets/turkishairwaysptfs-favicon.png">
+    <title>Book a flight | Turkish Airlines PTFS</title>
+    <style>
+      :root { color-scheme: dark; --ink:#f3f6fa; --muted:#9da8b7; --line:rgba(195,207,222,.15); --panel:rgba(11,16,24,.82); --red:#c8102e; --cyan:#66e4ed; }
+      * { box-sizing: border-box; } body { margin:0; color:var(--ink); background:#07090d; font:15px/1.6 Inter,system-ui,sans-serif; }
+      .shell { width:min(940px,calc(100% - 32px)); margin:auto; } header { padding:22px 0; border-bottom:1px solid var(--line); }
+      nav { display:flex; justify-content:space-between; align-items:center; gap:18px; } a { color:inherit; text-decoration:none; }
+      .brand { display:flex; align-items:center; gap:10px; font-weight:800; } .brand img { width:38px; height:38px; border-radius:50%; background:#fff; }
+      .back { color:var(--cyan); } main { padding:80px 0; } .eyebrow { color:var(--cyan); text-transform:uppercase; letter-spacing:.15em; font-size:.75rem; font-weight:800; }
+      h1 { margin:12px 0; font-size:clamp(2.7rem,7vw,5.5rem); line-height:.92; letter-spacing:-.08em; } .intro { color:var(--muted); max-width:560px; }
+      form, .flight-list { margin-top:32px; } .flight-list { display:grid; gap:12px; } .flight { display:flex; justify-content:space-between; align-items:center; gap:20px; padding:20px; border:1px solid var(--line); border-radius:16px; background:var(--panel); }
+      .flight strong { display:block; font-size:1.2rem; } .flight span { color:var(--muted); } .flight button, .submit { border:0; border-radius:10px; padding:11px 16px; color:#fff; background:var(--red); font-weight:800; cursor:pointer; }
+      .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; } label { display:grid; gap:7px; color:var(--muted); } input, select { width:100%; padding:12px; border:1px solid var(--line); border-radius:9px; color:var(--ink); background:#0d141e; font:inherit; } .notice { margin-top:18px; color:var(--muted); } .error { color:#ff7182; }
+      @media(max-width:600px){.flight,.form-grid{grid-template-columns:1fr;display:grid}.flight button{width:100%}}
+    </style>
+  </head>
+  <body>
+    <header><div class="shell"><nav><a class="brand" href="./"><img src="assets/turkishairwaysptfs-logo.webp" alt="">TurkishAirwaysPTFS</a><a class="back" href="./">← Home</a></nav></div></header>
+    <main class="shell"><div class="eyebrow">Passenger services</div><h1>Book your next journey.</h1><p class="intro">Choose an available Turkish Airlines PTFS flight and send your booking request to our operations team.</p><div id="flight-list" class="flight-list"></div><form id="booking-form" hidden><div class="form-grid"><label>Passenger name<input name="passengerName" required maxlength="100"></label><label>Email<input name="email" type="email" required maxlength="200"></label></div><input name="flightId" type="hidden"><p class="notice">You must sign in with Discord before confirming a booking.</p><button class="submit">Confirm booking</button><p id="message" class="notice"></p></form></main>
+    <script src="assets/site.js"></script><script>
+      const list = document.querySelector("#flight-list"), form = document.querySelector("#booking-form"), message = document.querySelector("#message");
+      const load = async () => { try { const { flights } = await ptfs.api("/api/flights"); list.innerHTML = flights.length ? flights.map((f) => `<article class="flight"><div><strong>${f.flightNumber}: ${f.origin} → ${f.destination}</strong><span>${f.departure} · ${f.aircraft}</span></div><button data-flight="${f.id}">Book flight</button></article>`).join("") : '<p class="notice">No flights are available yet. Check back soon.</p>'; } catch (e) { list.innerHTML = `<p class="error">${e.message}</p>`; } };
+      list.addEventListener("click", (e) => { const button = e.target.closest("[data-flight]"); if (!button) return; if (!ptfs.getSession()) { window.location.href = ptfs.DISCORD_SIGN_IN_URL; return; } form.hidden = false; form.flightId.value = button.dataset.flight; form.scrollIntoView({ behavior:"smooth", block:"center" }); });
+      form.addEventListener("submit", async (e) => { e.preventDefault(); message.textContent = ""; try { await ptfs.api("/api/bookings", { method:"POST", body:JSON.stringify(Object.fromEntries(new FormData(form))) }); message.textContent = "Your booking request was received."; form.reset(); } catch (error) { message.className = "notice error"; message.textContent = error.message; } });
+      ptfs.setupAuth(); load();
+    </script>
+  </body>
+</html>

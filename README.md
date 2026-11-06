@@ -5,6 +5,11 @@ A Discord bot that automatically welcomes members when they join a server.
 The project website is available at
 [iancodes0.github.io/FlightMaker](https://iancodes0.github.io/FlightMaker/).
 
+The TurkishAirwaysPTFS site includes a Discord sign-in flow, public flight
+booking page, and staff-only flight management page. Configure
+`DISCORD_CLIENT_SECRET` and `SESSION_SECRET` in the Railway service variables
+before enabling bookings or staff access.
+
 ## Setup
 
 1. Install dependencies:
