@@ -109,6 +109,22 @@
       .stat span { color: var(--muted); font-size: .83rem; }
       footer { padding: 30px 0 44px; border-top: 1px solid var(--line); color: var(--muted); font-size: .86rem; }
       footer .shell { display: flex; justify-content: space-between; gap: 20px; }
+      [data-reveal] {
+        opacity: 0;
+        transform: translateY(34px);
+        transition: opacity .8s cubic-bezier(.22, 1, .36, 1), transform .8s cubic-bezier(.22, 1, .36, 1);
+        transition-delay: var(--reveal-delay, 0ms);
+      }
+      [data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+      .hero [data-reveal] { transform: translateY(24px); }
+      .hero [data-reveal].is-visible { transform: translateY(0); }
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        [data-reveal], .hero [data-reveal] {
+          opacity: 1; transform: none; transition: none;
+        }
+        .nav-button:hover, .button:hover, .card:hover { transform: none; }
+      }
       @media (max-width: 780px) {
         .shell { width: min(100% - 28px, 600px); }
         .nav-links { display: none; }
@@ -146,10 +162,10 @@
     <main>
       <section class="shell hero">
         <div class="hero-content">
-          <div class="eyebrow">Istanbul, Türkiye · TFS</div>
-          <h1>Widen your <span>world.</span></h1>
-          <p class="hero-copy">Welcome to Turkish Airlines TFS. We connect a global aviation community through authentic operations, unforgettable flights, and the spirit of Turkish hospitality.</p>
-          <div class="actions">
+          <div class="eyebrow" data-reveal style="--reveal-delay: 80ms;">Istanbul, Türkiye · TFS</div>
+          <h1 data-reveal style="--reveal-delay: 180ms;">Widen your <span>world.</span></h1>
+          <p class="hero-copy" data-reveal style="--reveal-delay: 280ms;">Welcome to Turkish Airlines TFS. We connect a global aviation community through authentic operations, unforgettable flights, and the spirit of Turkish hospitality.</p>
+          <div class="actions" data-reveal style="--reveal-delay: 380ms;">
             <a class="button primary" href="#network">Explore our network <span aria-hidden="true">↗</span></a>
             <a class="button" href="#about">Discover our story</a>
           </div>
@@ -157,25 +173,25 @@
       </section>
 
       <section id="about" class="shell">
-        <div class="section-heading">
+        <div class="section-heading" data-reveal>
           <div class="eyebrow">More than a destination</div>
           <h2>One world. One extraordinary journey.</h2>
           <p>Turkish Airlines TFS brings people together across the virtual skies with an experience shaped by precision, warmth, and a passion for flight.</p>
         </div>
         <div class="cards">
-          <article class="card"><div class="card-number">01 / SERVICE</div><h3>Turkish hospitality</h3><p>Every passenger is welcomed with care, respect, and the unmistakable warmth of Türkiye.</p></article>
-          <article class="card"><div class="card-number">02 / EXPERIENCE</div><h3>Made for aviation</h3><p>From the first briefing to the final approach, we make every operation feel purposeful and real.</p></article>
-          <article class="card"><div class="card-number">03 / COMMUNITY</div><h3>Connected by flight</h3><p>Meet a worldwide community of enthusiasts who share the same love for discovery and aviation.</p></article>
+          <article class="card" data-reveal style="--reveal-delay: 80ms;"><div class="card-number">01 / SERVICE</div><h3>Turkish hospitality</h3><p>Every passenger is welcomed with care, respect, and the unmistakable warmth of Türkiye.</p></article>
+          <article class="card" data-reveal style="--reveal-delay: 170ms;"><div class="card-number">02 / EXPERIENCE</div><h3>Made for aviation</h3><p>From the first briefing to the final approach, we make every operation feel purposeful and real.</p></article>
+          <article class="card" data-reveal style="--reveal-delay: 260ms;"><div class="card-number">03 / COMMUNITY</div><h3>Connected by flight</h3><p>Meet a worldwide community of enthusiasts who share the same love for discovery and aviation.</p></article>
         </div>
       </section>
 
       <section id="network" class="shell">
-        <div class="section-heading">
+        <div class="section-heading" data-reveal>
           <div class="eyebrow">Our network</div>
           <h2>From Istanbul to everywhere.</h2>
           <p>Discover the routes, cities, and people that make Turkish Airlines TFS a truly global experience.</p>
         </div>
-        <div class="stats">
+        <div class="stats" data-reveal>
           <div class="stat"><strong>IST</strong><span>Our home in Istanbul</span></div>
           <div class="stat"><strong>360°</strong><span>A world of possibilities</span></div>
           <div class="stat"><strong>24/7</strong><span>Passion for aviation</span></div>
@@ -190,5 +206,20 @@
         <span>Widen your world.</span>
       </div>
     </footer>
+    <script>
+      const revealItems = document.querySelectorAll("[data-reveal]");
+      const revealObserver = new IntersectionObserver(
+        (entries, observer) => {
+          entries.forEach((entry) => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          });
+        },
+        { threshold: 0.14, rootMargin: "0px 0px -36px" }
+      );
+
+      revealItems.forEach((item) => revealObserver.observe(item));
+    </script>
   </body>
 </html>
