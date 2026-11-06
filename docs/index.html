@@ -3,20 +3,21 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Turkish Airlines TFS is a Discord aviation community powered by FlightMaker.">
-    <meta name="theme-color" content="#c8102e">
-    <title>Turkish Airlines TFS | Fly beyond</title>
+    <meta name="description" content="Turkish Airlines TFS — a global aviation community connecting virtual skies.">
+    <meta name="theme-color" content="#07090d">
+    <title>Turkish Airlines TFS</title>
     <style>
       :root {
         color-scheme: dark;
-        --ink: #edf6ff;
-        --muted: #9db1c7;
-        --line: rgba(157, 177, 199, .2);
-        --panel: rgba(14, 30, 50, .72);
+        --ink: #f3f6fa;
+        --muted: #9da8b7;
+        --soft: #c4ccd7;
+        --line: rgba(195, 207, 222, .15);
+        --panel: rgba(11, 16, 24, .72);
         --red: #c8102e;
-        --coral: #ff526d;
-        --gold: #f5c451;
-        --bg: #07111f;
+        --red-light: #ff4058;
+        --cyan: #66e4ed;
+        --bg: #07090d;
       }
 
       * { box-sizing: border-box; }
@@ -25,68 +26,98 @@
         margin: 0;
         color: var(--ink);
         background:
-          radial-gradient(circle at 85% 5%, rgba(200, 16, 46, .22), transparent 30rem),
-          radial-gradient(circle at 5% 30%, rgba(245, 196, 81, .1), transparent 28rem),
+          linear-gradient(180deg, rgba(7, 9, 13, .78), rgba(7, 9, 13, .98)),
+          radial-gradient(ellipse at 75% 30%, rgba(200, 16, 46, .22), transparent 38rem),
+          radial-gradient(ellipse at 20% 65%, rgba(38, 104, 130, .16), transparent 32rem),
           var(--bg);
-        font: 16px/1.6 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        font: 15px/1.7 Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
 
+      body::before {
+        content: ""; position: fixed; inset: 0; pointer-events: none; opacity: .16;
+        background-image: linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+        background-size: 80px 80px;
+        mask-image: linear-gradient(to bottom, black, transparent 72%);
+      }
       a { color: inherit; }
-      .shell { width: min(1120px, calc(100% - 40px)); margin: auto; }
-      header { padding: 26px 0; }
-      nav { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-      .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; letter-spacing: -.03em; }
+      .shell { width: min(1180px, calc(100% - 40px)); margin: auto; }
+      header { position: relative; z-index: 1; padding: 22px 0; }
+      nav {
+        display: flex; align-items: center; justify-content: space-between; gap: 24px;
+        padding: 14px 18px; border: 1px solid var(--line); border-radius: 20px;
+        background: rgba(7, 10, 15, .76); backdrop-filter: blur(18px);
+      }
+      .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 800; letter-spacing: -.025em; }
       .mark {
-        display: grid; place-items: center; width: 42px; height: 42px; border-radius: 14px;
-        color: #fff; background: linear-gradient(135deg, var(--red), var(--coral));
-        box-shadow: 0 0 30px rgba(200, 16, 46, .35);
+        display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.3);
+        border-radius: 50%; color: #fff; background: var(--red); font-size: 1.15rem;
+        box-shadow: 0 0 24px rgba(200, 16, 46, .3);
       }
-      .nav-links { display: flex; gap: 24px; color: var(--muted); font-size: .94rem; }
+      .brand strong { color: var(--red-light); }
+      .nav-links { display: flex; align-items: center; gap: 28px; color: var(--soft); font-size: .9rem; }
       .nav-links a { text-decoration: none; }
-      .nav-links a:hover { color: var(--ink); }
-      .hero { display: grid; grid-template-columns: 1.1fr .9fr; gap: 64px; align-items: center; padding: 92px 0 110px; }
-      .eyebrow { color: var(--coral); font-size: .78rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
-      h1 { max-width: 700px; margin: 14px 0 22px; font-size: clamp(3.2rem, 8vw, 6.7rem); line-height: .96; letter-spacing: -.075em; }
-      .lead { max-width: 600px; color: var(--muted); font-size: 1.15rem; }
+      .nav-links a:hover, .nav-links .active { color: var(--cyan); }
+      .nav-actions { display: flex; align-items: center; gap: 8px; }
+      .nav-button, .button {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        border: 1px solid var(--line); border-radius: 11px; padding: 9px 14px;
+        text-decoration: none; font-size: .86rem; font-weight: 700;
+      }
+      .nav-button.primary, .button.primary { border-color: rgba(102, 228, 237, .4); color: var(--cyan); background: rgba(40, 182, 198, .1); }
+      .nav-button:hover, .button:hover { border-color: var(--cyan); transform: translateY(-2px); }
+      .hero {
+        min-height: 635px; display: flex; align-items: center; position: relative; overflow: hidden;
+        padding: 88px 0 106px;
+      }
+      .hero::after {
+        content: "✈"; position: absolute; right: 6%; top: 17%; color: rgba(255,255,255,.045);
+        font-size: clamp(12rem, 27vw, 26rem); line-height: 1; transform: rotate(-18deg); pointer-events: none;
+      }
+      .hero-content { position: relative; z-index: 1; max-width: 700px; }
+      .eyebrow {
+        display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px;
+        border: 1px solid var(--line); border-radius: 999px; color: var(--soft);
+        font-size: .72rem; font-weight: 800; letter-spacing: .16em; text-transform: uppercase;
+        background: rgba(12, 17, 24, .7);
+      }
+      .eyebrow::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: #45e6a3; box-shadow: 0 0 13px #45e6a3; }
+      h1 { max-width: 680px; margin: 28px 0 22px; font-size: clamp(3.4rem, 9vw, 7.6rem); line-height: .88; letter-spacing: -.085em; }
+      h1 span { color: var(--red-light); }
+      .hero-copy { max-width: 580px; color: var(--soft); font-size: 1.12rem; }
       .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
-      .button {
-        display: inline-flex; align-items: center; justify-content: center; padding: 12px 18px;
-        border: 1px solid var(--line); border-radius: 12px; text-decoration: none; font-weight: 700;
+      .button { padding: 12px 20px; }
+      .button.primary { color: #fff; border-color: transparent; background: var(--red); box-shadow: 0 12px 32px rgba(200, 16, 46, .22); }
+      .button.primary:hover { border-color: transparent; background: var(--red-light); }
+      section { padding: 76px 0; }
+      .section-heading { max-width: 650px; margin-bottom: 30px; }
+      .section-heading .eyebrow { margin-bottom: 18px; }
+      h2 { margin: 0 0 12px; font-size: clamp(2.2rem, 5vw, 4rem); line-height: .98; letter-spacing: -.07em; }
+      .section-heading p { color: var(--muted); font-size: 1.03rem; }
+      .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+      .card {
+        min-height: 215px; padding: 25px; border: 1px solid var(--line); border-radius: 18px;
+        background: linear-gradient(145deg, rgba(25, 34, 47, .55), var(--panel)); transition: transform .2s, border-color .2s;
       }
-      .button.primary { color: #fff; border-color: transparent; background: var(--red); }
-      .button:hover { transform: translateY(-2px); }
-      .flight-card {
-        position: relative; overflow: hidden; padding: 26px; border: 1px solid var(--line);
-        border-radius: 26px; background: linear-gradient(145deg, rgba(200, 16, 46, .18), var(--panel));
-        box-shadow: 0 24px 80px rgba(0, 0, 0, .28);
-      }
-      .flight-card::after {
-        content: ""; position: absolute; width: 170px; height: 170px; right: -60px; top: -60px;
-        border: 1px solid rgba(245, 196, 81, .3); border-radius: 50%;
-        box-shadow: 0 0 0 24px rgba(245, 196, 81, .04), 0 0 0 48px rgba(245, 196, 81, .03);
-      }
-      .card-top, .route, .card-bottom { display: flex; justify-content: space-between; gap: 16px; }
-      .card-top, .card-bottom { color: var(--muted); font-size: .83rem; }
-      .route { align-items: end; padding: 60px 0 48px; }
-      .airport { font-size: 2.8rem; font-weight: 800; letter-spacing: -.08em; }
-      .line { flex: 1; height: 1px; margin-bottom: 15px; background: linear-gradient(90deg, var(--red), var(--gold)); }
-      section { padding: 50px 0 100px; }
-      .section-heading { max-width: 650px; margin-bottom: 28px; }
-      h2 { margin: 0 0 10px; font-size: clamp(2rem, 4vw, 3.2rem); line-height: 1; letter-spacing: -.055em; }
-      .section-heading p { color: var(--muted); }
-      .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-      .feature { min-height: 190px; padding: 24px; border: 1px solid var(--line); border-radius: 18px; background: var(--panel); }
-      .icon { color: var(--coral); font-size: 1.4rem; }
-      h3 { margin: 12px 0 7px; font-size: 1.12rem; }
-      .feature p { margin: 0; color: var(--muted); font-size: .94rem; }
-      .commands { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-      code { display: block; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; color: #c9d8ff; background: rgba(0, 0, 0, .18); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-      footer { padding: 28px 0 40px; border-top: 1px solid var(--line); color: var(--muted); font-size: .9rem; }
+      .card:hover { border-color: rgba(102, 228, 237, .38); transform: translateY(-4px); }
+      .card-number { color: var(--red-light); font-weight: 800; }
+      h3 { margin: 35px 0 8px; font-size: 1.2rem; }
+      .card p { margin: 0; color: var(--muted); font-size: .94rem; }
+      .stats { display: grid; grid-template-columns: repeat(4, 1fr); border-block: 1px solid var(--line); }
+      .stat { padding: 28px 20px; border-right: 1px solid var(--line); }
+      .stat:last-child { border-right: 0; }
+      .stat strong { display: block; color: var(--ink); font-size: 2rem; letter-spacing: -.06em; }
+      .stat span { color: var(--muted); font-size: .83rem; }
+      footer { padding: 30px 0 44px; border-top: 1px solid var(--line); color: var(--muted); font-size: .86rem; }
       footer .shell { display: flex; justify-content: space-between; gap: 20px; }
       @media (max-width: 780px) {
-        .hero { grid-template-columns: 1fr; gap: 40px; padding: 60px 0 70px; }
-        .grid, .commands { grid-template-columns: 1fr; }
+        .shell { width: min(100% - 28px, 600px); }
         .nav-links { display: none; }
+        .nav-actions .nav-button:first-child { display: none; }
+        .hero { min-height: 570px; padding: 68px 0; }
+        .hero::after { right: -15%; top: 30%; }
+        .cards, .stats { grid-template-columns: 1fr; }
+        .stat { border-right: 0; border-bottom: 1px solid var(--line); }
+        .stat:last-child { border-bottom: 0; }
         footer .shell { flex-direction: column; }
       }
     </style>
@@ -96,13 +127,17 @@
       <div class="shell">
         <nav aria-label="Main navigation">
           <a class="brand" href="#">
-            <span class="mark" aria-hidden="true">✈</span>
-            <span>Turkish Airlines TFS</span>
+            <span class="mark" aria-hidden="true">✦</span>
+            <span>Turkish Airlines <strong>TFS</strong></span>
           </a>
           <div class="nav-links">
-            <a href="#features">Features</a>
-            <a href="#commands">Commands</a>
-            <a href="https://github.com/iancodes0/FlightMaker">GitHub</a>
+            <a class="active" href="#">Home</a>
+            <a href="#about">About us</a>
+            <a href="#network">Network</a>
+          </div>
+          <div class="nav-actions">
+            <a class="nav-button primary" href="#network">Our network</a>
+            <a class="nav-button" href="#about">About TFS</a>
           </div>
         </nav>
       </div>
@@ -110,44 +145,41 @@
 
     <main>
       <section class="shell hero">
-        <div>
-          <div class="eyebrow">Turkish Airlines TFS</div>
-          <h1>Fly beyond the ordinary.</h1>
-          <p class="lead">Welcome to the Turkish Airlines TFS community: a place for realistic flights, polished operations, and memorable journeys across the virtual skies.</p>
+        <div class="hero-content">
+          <div class="eyebrow">Istanbul, Türkiye · TFS</div>
+          <h1>Widen your <span>world.</span></h1>
+          <p class="hero-copy">Welcome to Turkish Airlines TFS. We connect a global aviation community through authentic operations, unforgettable flights, and the spirit of Turkish hospitality.</p>
           <div class="actions">
-            <a class="button primary" href="https://github.com/iancodes0/FlightMaker">Explore our community</a>
-            <a class="button" href="#features">Discover TFS</a>
+            <a class="button primary" href="#network">Explore our network <span aria-hidden="true">↗</span></a>
+            <a class="button" href="#about">Discover our story</a>
           </div>
         </div>
-        <div class="flight-card" aria-label="Example flight card">
-          <div class="card-top"><span>TURKISH AIRLINES TFS</span><span>TK-ABC123</span></div>
-          <div class="route"><span class="airport">IST</span><span class="line" aria-hidden="true"></span><span class="airport">JFK</span></div>
-          <div class="card-bottom"><span>Turkish Airlines TFS</span><span>ON TIME</span></div>
+      </section>
+
+      <section id="about" class="shell">
+        <div class="section-heading">
+          <div class="eyebrow">More than a destination</div>
+          <h2>One world. One extraordinary journey.</h2>
+          <p>Turkish Airlines TFS brings people together across the virtual skies with an experience shaped by precision, warmth, and a passion for flight.</p>
+        </div>
+        <div class="cards">
+          <article class="card"><div class="card-number">01 / SERVICE</div><h3>Turkish hospitality</h3><p>Every passenger is welcomed with care, respect, and the unmistakable warmth of Türkiye.</p></article>
+          <article class="card"><div class="card-number">02 / EXPERIENCE</div><h3>Made for aviation</h3><p>From the first briefing to the final approach, we make every operation feel purposeful and real.</p></article>
+          <article class="card"><div class="card-number">03 / COMMUNITY</div><h3>Connected by flight</h3><p>Meet a worldwide community of enthusiasts who share the same love for discovery and aviation.</p></article>
         </div>
       </section>
 
-      <section id="features" class="shell">
+      <section id="network" class="shell">
         <div class="section-heading">
-          <div class="eyebrow">The TFS experience</div>
-          <h2>Connect continents. Create memories.</h2>
-          <p>From Istanbul to the world, Turkish Airlines TFS brings the spirit of aviation to every community flight.</p>
+          <div class="eyebrow">Our network</div>
+          <h2>From Istanbul to everywhere.</h2>
+          <p>Discover the routes, cities, and people that make Turkish Airlines TFS a truly global experience.</p>
         </div>
-        <div class="grid">
-          <article class="feature"><div class="icon">✦</div><h3>Turkish hospitality</h3><p>Welcome every passenger with the warmth, care, and character of Turkish Airlines.</p></article>
-          <article class="feature"><div class="icon">↗</div><h3>Global network</h3><p>Plan and announce realistic TFS flights connecting Istanbul with destinations worldwide.</p></article>
-          <article class="feature"><div class="icon">▣</div><h3>Always connected</h3><p>Meet fellow aviation fans, coordinate operations, and keep every journey running smoothly.</p></article>
-        </div>
-      </section>
-
-      <section id="commands" class="shell">
-        <div class="section-heading">
-          <div class="eyebrow">Operations center</div>
-          <h2>Your journey starts here.</h2>
-          <p>Our Discord operations are powered by FlightMaker, keeping Turkish Airlines TFS organized from boarding to arrival.</p>
-        </div>
-        <div class="commands">
-          <code>/announce</code><code>/announce2</code><code>/announce3</code><code>/event</code>
-          <code>/giverole</code><code>/ticket</code><code>/rules</code><code>/united</code>
+        <div class="stats">
+          <div class="stat"><strong>IST</strong><span>Our home in Istanbul</span></div>
+          <div class="stat"><strong>360°</strong><span>A world of possibilities</span></div>
+          <div class="stat"><strong>24/7</strong><span>Passion for aviation</span></div>
+          <div class="stat"><strong>∞</strong><span>Journeys to remember</span></div>
         </div>
       </section>
     </main>
@@ -155,7 +187,7 @@
     <footer>
       <div class="shell">
         <span>© 2026 Turkish Airlines TFS</span>
-        <a href="https://github.com/iancodes0/FlightMaker">TFS operations on GitHub →</a>
+        <span>Widen your world.</span>
       </div>
     </footer>
   </body>
