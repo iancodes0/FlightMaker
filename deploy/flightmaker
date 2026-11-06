@@ -1,0 +1,67 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          flightmaker
+# Required-Start:    $network
+# Required-Stop:     $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: FlightMaker Discord bot
+### END INIT INFO
+
+set -eu
+
+NAME=flightmaker
+APP_DIR=${APP_DIR:-/opt/flightmaker}
+ENV_FILE=${ENV_FILE:-/etc/flightmaker/flightmaker.env}
+PIDFILE=${PIDFILE:-/run/$NAME.pid}
+LOGFILE=${LOGFILE:-/var/log/$NAME.log}
+RUN_USER=${RUN_USER:-flightmaker}
+NODE_BIN=${NODE_BIN:-$(readlink -f "$(command -v node)")}
+
+start() {
+  if [ ! -x "$NODE_BIN" ]; then
+    echo "Node.js executable not found: $NODE_BIN" >&2
+    exit 1
+  fi
+  if [ ! -f "$ENV_FILE" ]; then
+    echo "Environment file not found: $ENV_FILE" >&2
+    exit 1
+  fi
+  set -a
+  . "$ENV_FILE"
+  set +a
+  if start-stop-daemon --test --start --quiet --pidfile "$PIDFILE" --exec "$NODE_BIN"; then
+    rm -f "$PIDFILE"
+    start-stop-daemon --start --background --make-pidfile --pidfile "$PIDFILE" \
+      --chuid "$RUN_USER" --chdir "$APP_DIR" --exec "$NODE_BIN" --startas "$NODE_BIN" \
+      -- -r dotenv/config src/index.js >>"$LOGFILE" 2>&1
+    echo "$NAME started"
+  else
+    echo "$NAME is already running"
+  fi
+}
+
+stop() {
+  if start-stop-daemon --stop --quiet --retry=TERM/30/KILL/5 --pidfile "$PIDFILE"; then
+    rm -f "$PIDFILE"
+    echo "$NAME stopped"
+  else
+    echo "$NAME is not running"
+  fi
+}
+
+status() {
+  if start-stop-daemon --test --start --quiet --pidfile "$PIDFILE" --exec "$NODE_BIN"; then
+    echo "$NAME is not running"
+    return 3
+  fi
+  echo "$NAME is running"
+}
+
+case "${1:-}" in
+  start) start ;;
+  stop) stop ;;
+  restart) stop || true; start ;;
+  status) status ;;
+  *) echo "Usage: service $NAME {start|stop|restart|status}" >&2; exit 2 ;;
+esac

@@ -1,0 +1,19 @@
+[Unit]
+Description=FlightMaker Discord bot
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/flightmaker
+ExecStart=/usr/bin/node /opt/flightmaker/src/index.js
+EnvironmentFile=/etc/flightmaker/flightmaker.env
+Restart=on-failure
+RestartSec=10
+User=flightmaker
+Group=flightmaker
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
