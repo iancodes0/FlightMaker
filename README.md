@@ -39,7 +39,7 @@ before enabling bookings or staff access.
 
 The bot posts welcome messages in channel `1568359911425974513`. New members
 receive a Turkish Airlines-themed generated welcome card containing their
-display name, current profile picture, and member number. The bot needs View
+display name and current profile picture. The bot needs View
 Channel, Send Messages, and Attach Files permissions in that channel. After
 updating the bot, restart the running process so the new join handler is loaded.
 

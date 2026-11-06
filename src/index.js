@@ -92,7 +92,7 @@ const loadMemberAvatar = async (member) => {
   return loadImage(Buffer.from(await response.arrayBuffer()));
 };
 
-const createWelcomeCard = async (member, memberCount) => {
+const createWelcomeCard = async (member) => {
   const canvas = createCanvas(WELCOME_CARD.width, WELCOME_CARD.height);
   const context = canvas.getContext("2d");
   const background = context.createLinearGradient(0, 0, WELCOME_CARD.width, WELCOME_CARD.height);
@@ -153,36 +153,8 @@ const createWelcomeCard = async (member, memberCount) => {
   context.fillStyle = WELCOME_CARD.mutedText;
   context.font = "28px sans-serif";
   context.fillText(`@${member.user.username}`, 410, 270);
-  context.fillStyle = WELCOME_CARD.accent;
-  context.font = "bold 30px sans-serif";
-  context.fillText(`You are the ${getOrdinal(memberCount)} member`, 410, 325);
 
   return canvas.encode("png");
-};
-
-const getOrdinal = (number) => {
-  const suffix =
-    number % 100 >= 11 && number % 100 <= 13
-      ? "th"
-      : { 1: "st", 2: "nd", 3: "rd" }[number % 10] || "th";
-  return `${number}${suffix}`;
-};
-
-const getWelcomeMemberCount = async (guild) => {
-  if (Number.isInteger(guild.memberCount) && guild.memberCount > 0) {
-    return guild.memberCount;
-  }
-
-  const fetchedGuild = await guild.fetch();
-  if (Number.isInteger(fetchedGuild.memberCount) && fetchedGuild.memberCount > 0) {
-    return fetchedGuild.memberCount;
-  }
-
-  const members = await guild.members.fetch();
-  if (members.size < 1) {
-    throw new Error(`Discord returned an invalid member count for guild ${guild.id}`);
-  }
-  return members.size;
 };
 
 const ptfsAircraft = [
@@ -1030,8 +1002,7 @@ client.on(Events.GuildMemberAdd, async (member) => {
   }
 
   try {
-    const memberCount = await getWelcomeMemberCount(member.guild);
-    const card = await createWelcomeCard(member, memberCount);
+    const card = await createWelcomeCard(member);
     const attachment = new AttachmentBuilder(card, { name: "welcome-card.png" });
     await channel.send({
       content: `Welcome to Turkish Airlines PTFS, ${member}!`,
