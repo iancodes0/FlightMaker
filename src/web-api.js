@@ -6,9 +6,9 @@ const path = require("node:path");
 const API_PORT = Number(process.env.PORT || 3000);
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID || "1568375825445822654";
 const CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const REDIRECT_URI = "https://turkishairwaysptfs.github.io/";
+const REDIRECT_URI = "https://turkishairlinesptfs.github.io/";
 const ALLOWED_ORIGINS = new Set([
-  "https://turkishairwaysptfs.github.io",
+  "https://turkishairlinesptfs.github.io",
   "https://iancodes0.github.io",
 ]);
 const STAFF_IDS = new Set([
@@ -36,7 +36,7 @@ const writeData = (data) => {
 const send = (response, status, body, origin) => {
   response.writeHead(status, {
     "Content-Type": "application/json; charset=utf-8",
-    "Access-Control-Allow-Origin": origin || "https://turkishairwaysptfs.github.io",
+    "Access-Control-Allow-Origin": origin || "https://turkishairlinesptfs.github.io",
     "Access-Control-Allow-Headers": "Content-Type, X-Session-Token",
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
     Vary: "Origin",

@@ -1,6 +1,6 @@
 const API_URL = "https://flightmaker-production.up.railway.app";
 const DISCORD_SIGN_IN_URL =
-  "https://discord.com/oauth2/authorize?client_id=1568375825445822654&response_type=code&redirect_uri=https%3A%2F%2Fturkishairwaysptfs.github.io%2F&scope=identify";
+  "https://discord.com/oauth2/authorize?client_id=1568375825445822654&response_type=code&redirect_uri=https%3A%2F%2Fturkishairlinesptfs.github.io%2F&scope=identify";
 
 const getSession = () => {
   try {
