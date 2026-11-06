@@ -66,12 +66,13 @@
       .nav-button.primary, .button.primary { border-color: rgba(102, 228, 237, .4); color: var(--cyan); background: rgba(40, 182, 198, .1); }
       .nav-button:hover, .button:hover { border-color: var(--cyan); transform: translateY(-2px); }
       .hero {
-        min-height: 635px; display: flex; align-items: center; position: relative; overflow: hidden;
-        padding: 88px 0 106px; border-radius: 0 0 28px 28px;
+        width: 100vw; max-width: none; min-height: calc(100vh - 92px); display: flex; align-items: center;
+        position: relative; overflow: hidden; margin-left: calc(50% - 50vw);
+        padding: 88px max(20px, calc((100vw - 1180px) / 2)) 106px; border-radius: 0;
         background:
           linear-gradient(90deg, rgba(7, 9, 13, .98) 0%, rgba(7, 9, 13, .82) 43%, rgba(7, 9, 13, .38) 100%),
           linear-gradient(180deg, rgba(7, 9, 13, .16), rgba(7, 9, 13, .68)),
-          url("assets/turkish-airlines-tfs-background.jpeg") center top / auto 120% no-repeat;
+          url("assets/turkish-airlines-tfs-background.jpeg") center / cover no-repeat;
       }
       .hero-content { position: relative; z-index: 1; max-width: 700px; }
       .eyebrow {
@@ -129,8 +130,7 @@
         .shell { width: min(100% - 28px, 600px); }
         .nav-links { display: none; }
         .nav-actions .nav-button:first-child { display: none; }
-        .hero { min-height: 570px; padding: 68px 0; }
-        .hero { background-position: center top; background-size: auto 135%; }
+        .hero { min-height: calc(100vh - 82px); padding: 68px 14px; background-position: center; }
         .cards, .stats { grid-template-columns: 1fr; }
         .stat { border-right: 0; border-bottom: 1px solid var(--line); }
         .stat:last-child { border-bottom: 0; }
