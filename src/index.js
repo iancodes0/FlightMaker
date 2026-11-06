@@ -1003,6 +1003,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 client.on(Events.GuildMemberAdd, async (member) => {
+  if (member.user.bot) {
+    return;
+  }
+
   const channel = await client.channels.fetch(WELCOME_CHANNEL_ID).catch((error) => {
     console.error(`Could not fetch the welcome channel ${WELCOME_CHANNEL_ID}:`, error);
     return null;
