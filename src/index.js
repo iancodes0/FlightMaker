@@ -592,25 +592,12 @@ client.once(Events.ClientReady, (readyClient) => {
   readyClient.application.commands
     .set([
       new SlashCommandBuilder()
-        .setName("united")
-        .setDescription("Learn more about United Airlines.")
-        .toJSON(),
-      new SlashCommandBuilder()
         .setName("about")
         .setDescription("Learn about Turkish Airlines PTFS.")
         .toJSON(),
-      announceCommand.toJSON(),
-      announce2Command.toJSON(),
-      announce3Command.toJSON(),
-      editFlightCommand.toJSON(),
-      removeFlightCommand.toJSON(),
-      eventCommand.toJSON(),
-      giveRoleCommand.toJSON(),
-      new SlashCommandBuilder().setName("rules").setDescription("Show the United Airlines PTFS rules.").toJSON(),
-      new SlashCommandBuilder().setName("ticket").setDescription("Create a private support ticket.").toJSON(),
     ])
     .then(() =>
-      console.log("Registered global commands: /united, /about, /announce, /announce2, /announce3, /editflight, /removeflight, /event, /giverole, /rules, /ticket.")
+      console.log("Registered global command: /about.")
     )
     .catch((error) => console.error("Failed to register slash commands:", error));
   ensureTicketPanel().catch((error) => {

@@ -52,31 +52,7 @@ as `welcome-card.png`; no profile pictures are stored by the bot.
 
 ## Commands
 
-- `/united` — Shows a clean information card about United Airlines, including its global network, travel experiences, and helpful links.
 - `/about` — Explains Turkish Airlines PTFS and its goal of reflecting the spirit of the real airline.
-- `/announce` — Posts a PTFS flight announcement with destinations, flight number,
-  schedule, crew, operations, and a selectable PTFS aircraft. The flight engineer
-  field is not included.
-- `/announce2` — Posts a Project Flight announcement with the same required
-  schedule, crew, and operations options and a Project Flight aircraft selector.
-  The flight engineer field is not included.
-- `/announce3 role:<role>` — Opens a form for a normal announcement and pings
-  the selected role. If no role is selected, it pings `@here`.
-- `/editflight code:<code>` — Opens an edit form for a flight. Enter `.` for
-  any field that should remain unchanged.
-- `/removeflight code:<code>` — Deletes the flight record and its announcement.
-- `/event` — Opens an easy form to create a Discord scheduled event. Enter the
-  title, description, location, start, and end as `MM/DD/YYYY h:mm AM/PM` (UTC);
-  an image URL can be supplied optionally on the command. The creator needs the
-  **Manage Events** permission.
-- `/giverole user:<user> role:<role>` — Gives a role to a server member. This
-  command is restricted to the two configured authorized users, and the bot
-  needs **Manage Roles** with its highest role above the role being assigned.
-- `/rules` — Sends the United Airlines PTFS rules as a private cyan embed.
-- `/ticket` — Creates a private support ticket without using the ticket-panel button.
-
-Each `/announce` flight receives a unique code such as `UA-ABC123`. Flight
-records are saved in `data/flights.json` so they survive bot restarts.
 
 The bot also maintains a support-ticket panel in Discord channel
 `1567000517283020844`. Users can click **Create Support Ticket** to open one
