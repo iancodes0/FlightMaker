@@ -52,18 +52,18 @@ const setupAuth = async () => {
       const username = document.createElement("span");
       username.textContent = session.user.username;
       button.append(avatar, username);
+      button.href = "#";
+      button.setAttribute("aria-label", `Signed in as ${session.user.username}`);
+      button.removeAttribute("role");
     } else {
       button.textContent = "Sign in";
+      button.classList.remove("profile-chip");
+      button.removeAttribute("aria-label");
+      button.href = DISCORD_SIGN_IN_URL;
     }
-    button.href = session ? "#" : DISCORD_SIGN_IN_URL;
-    if (session) {
-      button.setAttribute("aria-label", "Sign out");
-      button.addEventListener("click", (event) => {
-        event.preventDefault();
-        sessionStorage.removeItem("ptfs-session");
-        window.location.reload();
-      });
-    }
+  });
+  document.querySelectorAll("[data-staff-link]").forEach((link) => {
+    link.hidden = !session?.user?.isStaff;
   });
   return session;
 };

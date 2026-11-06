@@ -67,6 +67,7 @@
       .nav-button.primary, .button.primary { border-color: rgba(102, 228, 237, .4); color: var(--cyan); background: rgba(40, 182, 198, .1); }
       .profile-chip { padding: 6px 11px 6px 7px; }
       .profile-chip img { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; }
+      [data-staff-link][hidden] { display: none; }
       .nav-button:hover, .button:hover { border-color: var(--cyan); transform: translateY(-2px); }
       .hero {
         width: 100vw; max-width: none; min-height: calc(100vh - 92px); display: flex; align-items: center;
@@ -157,6 +158,7 @@
           </div>
           <div class="nav-actions">
             <a class="nav-button primary" href="#network">Our network</a>
+            <a class="nav-button" data-staff-link href="staff.html" hidden>Staff</a>
             <a class="nav-button" data-sign-in href="https://discord.com/oauth2/authorize?client_id=1568375825445822654&response_type=code&redirect_uri=https%3A%2F%2Fturkishairlinesptfs.github.io%2F&scope=identify">Sign in</a>
           </div>
         </nav>
