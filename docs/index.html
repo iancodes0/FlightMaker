@@ -67,11 +67,11 @@
       .nav-button:hover, .button:hover { border-color: var(--cyan); transform: translateY(-2px); }
       .hero {
         min-height: 635px; display: flex; align-items: center; position: relative; overflow: hidden;
-        padding: 88px 0 106px;
-      }
-      .hero::after {
-        content: "✈"; position: absolute; right: 6%; top: 17%; color: rgba(255,255,255,.045);
-        font-size: clamp(12rem, 27vw, 26rem); line-height: 1; transform: rotate(-18deg); pointer-events: none;
+        padding: 88px 0 106px; border-radius: 0 0 28px 28px;
+        background:
+          linear-gradient(90deg, rgba(7, 9, 13, .98) 0%, rgba(7, 9, 13, .82) 43%, rgba(7, 9, 13, .38) 100%),
+          linear-gradient(180deg, rgba(7, 9, 13, .16), rgba(7, 9, 13, .68)),
+          url("assets/turkish-airlines-tfs-background.png") center / cover no-repeat;
       }
       .hero-content { position: relative; z-index: 1; max-width: 700px; }
       .eyebrow {
@@ -130,7 +130,7 @@
         .nav-links { display: none; }
         .nav-actions .nav-button:first-child { display: none; }
         .hero { min-height: 570px; padding: 68px 0; }
-        .hero::after { right: -15%; top: 30%; }
+        .hero { background-position: 64% center; }
         .cards, .stats { grid-template-columns: 1fr; }
         .stat { border-right: 0; border-bottom: 1px solid var(--line); }
         .stat:last-child { border-bottom: 0; }
