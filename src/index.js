@@ -31,6 +31,14 @@ if (!token) {
 }
 
 const FLIGHTS_FILE = path.join(__dirname, "..", "data", "flights.json");
+const WELCOME_CHANNEL_ID = "1568359911425974513";
+const WELCOME_LOGO_FILE = path.join(
+  __dirname,
+  "..",
+  "docs",
+  "assets",
+  "turkishairwaysptfs-logo.webp"
+);
 
 const loadFlights = () => {
   try {
@@ -61,12 +69,11 @@ const generateFlightCode = () => {
 const WELCOME_CARD = {
   width: 1200,
   height: 400,
-  background: "#111827",
-  accent: "#5865f2",
-  text: "#ffffff",
-  mutedText: "#cbd5e1",
-  title: "WELCOME TO THE SERVER",
-  subtitle: "We are glad to have you here!",
+  background: "#f7f7f7",
+  accent: "#c8102e",
+  text: "#171717",
+  mutedText: "#5b5b5b",
+  title: "TURKISH AIRLINES PTFS",
 };
 
 const roundedRect = (context, x, y, width, height, radius) => {
@@ -90,15 +97,24 @@ const createWelcomeCard = async (member) => {
   const context = canvas.getContext("2d");
   const background = context.createLinearGradient(0, 0, WELCOME_CARD.width, WELCOME_CARD.height);
   background.addColorStop(0, WELCOME_CARD.background);
-  background.addColorStop(1, WELCOME_CARD.accent);
+  background.addColorStop(1, "#e8e8e8");
   context.fillStyle = background;
   context.fillRect(0, 0, WELCOME_CARD.width, WELCOME_CARD.height);
 
-  context.fillStyle = "rgba(255, 255, 255, 0.08)";
-  roundedRect(context, 32, 32, WELCOME_CARD.width - 64, WELCOME_CARD.height - 64, 28);
+  context.fillStyle = WELCOME_CARD.accent;
+  context.fillRect(0, 0, 18, WELCOME_CARD.height);
+  context.fillStyle = "#ffffff";
+  roundedRect(context, 36, 36, WELCOME_CARD.width - 72, WELCOME_CARD.height - 72, 26);
+
+  try {
+    const logo = await loadImage(fs.readFileSync(WELCOME_LOGO_FILE));
+    context.drawImage(logo, 925, 72, 180, 180);
+  } catch (error) {
+    console.error("Failed to load the Turkish Airlines welcome logo:", error);
+  }
 
   const avatarSize = 220;
-  const avatarX = 105;
+  const avatarX = 88;
   const avatarY = (WELCOME_CARD.height - avatarSize) / 2;
   context.save();
   context.beginPath();
@@ -122,7 +138,7 @@ const createWelcomeCard = async (member) => {
   context.restore();
 
   context.strokeStyle = WELCOME_CARD.text;
-  context.lineWidth = 8;
+  context.lineWidth = 10;
   context.beginPath();
   context.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2, 0, Math.PI * 2);
   context.stroke();
@@ -137,9 +153,19 @@ const createWelcomeCard = async (member) => {
   context.fillStyle = WELCOME_CARD.mutedText;
   context.font = "28px sans-serif";
   context.fillText(`@${member.user.username}`, 410, 270);
-  context.fillText(WELCOME_CARD.subtitle, 410, 315);
+  context.fillStyle = WELCOME_CARD.accent;
+  context.font = "bold 30px sans-serif";
+  context.fillText(`You are the ${getOrdinal(member.guild.memberCount)} member`, 410, 325);
 
   return canvas.encode("png");
+};
+
+const getOrdinal = (number) => {
+  const suffix =
+    number % 100 >= 11 && number % 100 <= 13
+      ? "th"
+      : { 1: "st", 2: "nd", 3: "rd" }[number % 10] || "th";
+  return `${number}${suffix}`;
 };
 
 const ptfsAircraft = [
@@ -960,22 +986,25 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 client.on(Events.GuildMemberAdd, async (member) => {
+  const channel = await client.channels.fetch(WELCOME_CHANNEL_ID).catch((error) => {
+    console.error(`Could not fetch the welcome channel ${WELCOME_CHANNEL_ID}:`, error);
+    return null;
+  });
   const botMember = member.guild.members.me;
-  const canSend = (candidate) =>
-    candidate?.isTextBased() &&
-    botMember &&
-    candidate
-      .permissionsFor(botMember)
-      ?.has(PermissionsBitField.Flags.SendMessages);
-  const channel = canSend(member.guild.systemChannel)
-    ? member.guild.systemChannel
-    : member.guild.channels.cache
-        .filter(canSend)
-        .sort((first, second) => first.position - second.position)
-        .first();
+  const permissions = channel && botMember ? channel.permissionsFor(botMember) : null;
 
-  if (!channel || !channel.isTextBased()) {
-    console.error(`Could not find a writable text channel in ${member.guild.name}.`);
+  if (
+    !channel ||
+    !channel.isTextBased() ||
+    !permissions?.has([
+      PermissionsBitField.Flags.ViewChannel,
+      PermissionsBitField.Flags.SendMessages,
+      PermissionsBitField.Flags.AttachFiles,
+    ])
+  ) {
+    console.error(
+      `The bot cannot send welcome messages in channel ${WELCOME_CHANNEL_ID} for ${member.guild.name}.`
+    );
     return;
   }
 
@@ -983,7 +1012,7 @@ client.on(Events.GuildMemberAdd, async (member) => {
     const card = await createWelcomeCard(member);
     const attachment = new AttachmentBuilder(card, { name: "welcome-card.png" });
     await channel.send({
-      content: `Welcome to ${member.guild.name}, ${member}!`,
+      content: `Welcome to Turkish Airlines PTFS, ${member}!`,
       files: [attachment],
     });
   } catch (error) {

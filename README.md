@@ -35,10 +35,11 @@ before enabling bookings or staff access.
    npm start
    ```
 
-The bot posts in the server's configured system channel. If no system channel is configured, it uses the first text channel where it can send messages.
-New members receive a generated welcome card containing their display name and
-current profile picture. After updating the bot, restart the running process so
-the new join handler is loaded.
+The bot posts welcome messages in channel `1568359911425974513`. New members
+receive a Turkish Airlines-themed generated welcome card containing their
+display name, current profile picture, and member number. The bot needs View
+Channel, Send Messages, and Attach Files permissions in that channel. After
+updating the bot, restart the running process so the new join handler is loaded.
 
 ### Customize the welcome card
 
