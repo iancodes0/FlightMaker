@@ -2,6 +2,9 @@
 
 A Discord bot that automatically welcomes members when they join a server.
 
+The project website is available at
+[iancodes0.github.io/FlightMaker](https://iancodes0.github.io/FlightMaker/).
+
 ## Setup
 
 1. Install dependencies:
