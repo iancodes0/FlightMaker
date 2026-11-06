@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="TurkishAirwaysPTFS — a global aviation community connecting virtual skies.">
     <meta name="theme-color" content="#07090d">
+    <link rel="icon" type="image/webp" href="assets/turkishairwaysptfs-logo.webp">
+    <link rel="apple-touch-icon" href="assets/turkishairwaysptfs-logo.webp">
     <title>TurkishAirwaysPTFS</title>
     <style>
       :root {
@@ -49,9 +51,8 @@
       }
       .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; font-weight: 800; letter-spacing: -.025em; }
       .mark {
-        display: grid; place-items: center; width: 38px; height: 38px; border: 1px solid rgba(255,255,255,.3);
-        border-radius: 50%; color: #fff; background: var(--red); font-size: 1.15rem;
-        box-shadow: 0 0 24px rgba(200, 16, 46, .3);
+        display: block; width: 42px; height: 42px; border-radius: 50%; object-fit: cover;
+        background: #fff; box-shadow: 0 0 24px rgba(200, 16, 46, .3);
       }
       .brand strong { color: var(--red-light); }
       .nav-links { display: flex; align-items: center; gap: 28px; color: var(--soft); font-size: .9rem; }
@@ -143,7 +144,7 @@
       <div class="shell">
         <nav aria-label="Main navigation">
           <a class="brand" href="#">
-            <span class="mark" aria-hidden="true">✦</span>
+            <img class="mark" src="assets/turkishairwaysptfs-logo.webp" alt="Turkish Airlines logo">
             <span>TurkishAirwaysPTFS</span>
           </a>
           <div class="nav-links">
