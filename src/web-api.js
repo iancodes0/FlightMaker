@@ -98,6 +98,19 @@ const server = http.createServer(async (request, response) => {
     if (request.method === "GET" && url.pathname === "/api/flights") {
       return send(response, 200, { flights: readData().flights }, origin);
     }
+    if (request.method === "GET" && url.pathname === "/api/staff/overview") {
+      if (!requireStaff(request)) return send(response, 403, { error: "Staff access is required." }, origin);
+      const data = readData();
+      return send(response, 200, {
+        flights: data.flights,
+        bookings: data.bookings,
+        stats: {
+          totalFlights: data.flights.length,
+          totalBookings: data.bookings.length,
+          upcomingFlights: data.flights.filter((flight) => new Date(flight.departure).getTime() > Date.now()).length,
+        },
+      }, origin);
+    }
     if (request.method === "POST" && url.pathname === "/api/auth/exchange") {
       if (!CLIENT_SECRET) return send(response, 503, { error: "Discord OAuth is not configured on the server." }, origin);
       const { code } = await parseBody(request);
@@ -171,6 +184,18 @@ const server = http.createServer(async (request, response) => {
       data.flights.push(flight);
       writeData(data);
       return send(response, 201, { flight }, origin);
+    }
+    if (request.method === "DELETE" && url.pathname.startsWith("/api/flights/")) {
+      const session = requireStaff(request);
+      if (!session) return send(response, 403, { error: "Staff access is required." }, origin);
+      const flightId = url.pathname.slice("/api/flights/".length);
+      const data = readData();
+      const flightIndex = data.flights.findIndex((flight) => flight.id === flightId);
+      if (flightIndex === -1) return send(response, 404, { error: "Flight not found." }, origin);
+      const [flight] = data.flights.splice(flightIndex, 1);
+      data.bookings = data.bookings.filter((booking) => booking.flightId !== flightId);
+      writeData(data);
+      return send(response, 200, { flight });
     }
     return send(response, 404, { error: "Not found." }, origin);
   } catch (error) {
