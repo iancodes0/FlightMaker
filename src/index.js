@@ -788,13 +788,17 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (interaction.commandName === "flightplan") {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.reply({
+      content: "Creating your flight plan...",
+      ephemeral: true,
+    });
     try {
       const existingPilot = pilots[interaction.user.id];
       if (existingPilot?.activePlan) {
-        await interaction.editReply(
+        await interaction.editReply({
+          content:
           `You already have an active flight plan with code **${existingPilot.activePlan.code}**. Log that flight before creating another plan.`
-        );
+        });
         return;
       }
 
@@ -829,7 +833,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
       });
     } catch (error) {
       console.error(`Failed to create a flight plan for ${interaction.user.tag}:`, error);
-      await interaction.editReply("I could not create your flight plan. Please try again.");
+      await interaction.editReply({
+        content: "I could not create your flight plan. Please try again.",
+        embeds: [],
+      });
     }
     return;
   }
