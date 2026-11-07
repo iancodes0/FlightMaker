@@ -788,45 +788,49 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   if (interaction.commandName === "flightplan") {
-    const existingPilot = pilots[interaction.user.id];
-    if (existingPilot?.activePlan) {
-      await interaction.reply({
-        content: `You already have an active flight plan with code **${existingPilot.activePlan.code}**. Log that flight before creating another plan.`,
-        ephemeral: true,
-      });
-      return;
-    }
+    await interaction.deferReply({ ephemeral: true });
+    try {
+      const existingPilot = pilots[interaction.user.id];
+      if (existingPilot?.activePlan) {
+        await interaction.editReply(
+          `You already have an active flight plan with code **${existingPilot.activePlan.code}**. Log that flight before creating another plan.`
+        );
+        return;
+      }
 
-    const plan = {
-      code: generatePilotCode(),
-      departureAirport: interaction.options.getString("departure_airport", true),
-      arrivalAirport: interaction.options.getString("arrival_airport", true),
-      aircraft: interaction.options.getString("aircraft", true),
-      callsign: interaction.options.getString("callsign", true),
-      createdAt: new Date().toISOString(),
-    };
-    pilots[interaction.user.id] = {
-      totalMinutes: existingPilot?.totalMinutes || 0,
-      recentFlights: existingPilot?.recentFlights || [],
-      activePlan: plan,
-    };
-    savePilots(pilots);
-    await interaction.reply({
-      embeds: [
-        new EmbedBuilder()
-          .setColor(0xc8102e)
-          .setTitle("Flight plan created")
-          .setDescription(`Your flight plan code is **${plan.code}**. Use it with \`/logflight\` after completing the flight.`)
-          .addFields(
-            { name: "Departure", value: plan.departureAirport, inline: true },
-            { name: "Arrival", value: plan.arrivalAirport, inline: true },
-            { name: "Aircraft", value: plan.aircraft, inline: true },
-            { name: "Callsign", value: plan.callsign, inline: true }
-          )
-          .setFooter({ text: "Keep this code private until you log your flight." }),
-      ],
-      ephemeral: true,
-    });
+      const plan = {
+        code: generatePilotCode(),
+        departureAirport: interaction.options.getString("departure_airport", true),
+        arrivalAirport: interaction.options.getString("arrival_airport", true),
+        aircraft: interaction.options.getString("aircraft", true),
+        callsign: interaction.options.getString("callsign", true),
+        createdAt: new Date().toISOString(),
+      };
+      pilots[interaction.user.id] = {
+        totalMinutes: existingPilot?.totalMinutes || 0,
+        recentFlights: existingPilot?.recentFlights || [],
+        activePlan: plan,
+      };
+      savePilots(pilots);
+      await interaction.editReply({
+        embeds: [
+          new EmbedBuilder()
+            .setColor(0xc8102e)
+            .setTitle("Flight plan created")
+            .setDescription(`Your flight plan code is **${plan.code}**. Use it with \`/logflight\` after completing the flight.`)
+            .addFields(
+              { name: "Departure", value: plan.departureAirport, inline: true },
+              { name: "Arrival", value: plan.arrivalAirport, inline: true },
+              { name: "Aircraft", value: plan.aircraft, inline: true },
+              { name: "Callsign", value: plan.callsign, inline: true }
+            )
+            .setFooter({ text: "Keep this code private until you log your flight." }),
+        ],
+      });
+    } catch (error) {
+      console.error(`Failed to create a flight plan for ${interaction.user.tag}:`, error);
+      await interaction.editReply("I could not create your flight plan. Please try again.");
+    }
     return;
   }
 
