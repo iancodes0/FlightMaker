@@ -26,9 +26,10 @@
     <script src="assets/site.js"></script><script>
       const list = document.querySelector("#flight-list"), form = document.querySelector("#booking-form"), message = document.querySelector("#message");
       const load = async () => { try { const { flights } = await ptfs.api("/api/flights"); list.innerHTML = flights.length ? flights.map((f) => `<article class="flight"><div><strong>${f.flightNumber}: ${f.origin} → ${f.destination}</strong><span>${f.departure} · ${f.aircraft}</span></div><button data-flight="${f.id}">Book flight</button></article>`).join("") : '<p class="notice">No flights are available yet. Check back soon.</p>'; } catch (e) { list.innerHTML = `<p class="error">${e.message}</p>`; } };
-      list.addEventListener("click", (e) => { const button = e.target.closest("[data-flight]"); if (!button) return; if (!ptfs.getSession()) { window.location.href = ptfs.DISCORD_SIGN_IN_URL; return; } form.hidden = false; form.flightId.value = button.dataset.flight; form.scrollIntoView({ behavior:"smooth", block:"center" }); });
+      let session;
+      list.addEventListener("click", (e) => { const button = e.target.closest("[data-flight]"); if (!button) return; if (!session) { window.location.href = ptfs.DISCORD_SIGN_IN_URL; return; } form.hidden = false; form.flightId.value = button.dataset.flight; form.scrollIntoView({ behavior:"smooth", block:"center" }); });
       form.addEventListener("submit", async (e) => { e.preventDefault(); message.textContent = ""; try { await ptfs.api("/api/bookings", { method:"POST", body:JSON.stringify(Object.fromEntries(new FormData(form))) }); message.textContent = "Your booking request was received."; form.reset(); } catch (error) { message.className = "notice error"; message.textContent = error.message; } });
-      ptfs.setupAuth(); load();
+      (async () => { session = await ptfs.setupAuth(); await load(); })();
     </script>
   </body>
 </html>

@@ -4,13 +4,18 @@ const DISCORD_SIGN_IN_URL =
 
 const getSession = () => {
   try {
-    return JSON.parse(sessionStorage.getItem("ptfs-session") || "null");
+    const stored = localStorage.getItem("ptfs-session") || sessionStorage.getItem("ptfs-session");
+    return stored ? JSON.parse(stored) : null;
   } catch {
     return null;
   }
 };
 
-const setSession = (session) => sessionStorage.setItem("ptfs-session", JSON.stringify(session));
+const setSession = (session) => {
+  const serialized = JSON.stringify(session);
+  localStorage.setItem("ptfs-session", serialized);
+  sessionStorage.setItem("ptfs-session", serialized);
+};
 
 const api = async (path, options = {}) => {
   const session = getSession();
@@ -23,7 +28,13 @@ const api = async (path, options = {}) => {
     },
   });
   const body = await response.json();
-  if (!response.ok) throw new Error(body.error || "Request failed.");
+  if (!response.ok) {
+    if (response.status === 401) {
+      localStorage.removeItem("ptfs-session");
+      sessionStorage.removeItem("ptfs-session");
+    }
+    throw new Error(body.error || "Request failed.");
+  }
   return body;
 };
 
