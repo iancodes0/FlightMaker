@@ -9,8 +9,8 @@ The Turkish Airlines PTFS site includes a Discord sign-in flow, public flight
 booking page, passenger profile with booking history and boarding-pass
 redemption, and staff-only flight management page. Configure
 `DISCORD_CLIENT_SECRET` and `SESSION_SECRET` in the Railway service variables
-before enabling bookings or staff access. The bot token (`TURKISH_TOKEN` or
-`DISCORD_TOKEN`) must also be configured so the website can DM users their
+before enabling bookings or staff access. The Turkish bot token
+(`TURKISH_TOKEN`) must also be configured so the website can DM users their
 booking codes and boarding-pass confirmations.
 
 ## Setup
@@ -26,8 +26,6 @@ booking codes and boarding-pass confirmations.
    ```env
    TURKISH_TOKEN=your-turkish-bot-token-here
    ```
-
-   `DISCORD_TOKEN` is supported as a fallback for older deployments.
 
 3. Enable the **Server Members Intent** for the bot in the Discord Developer Portal.
 
@@ -75,9 +73,12 @@ reactions, bans, and unbans. User references are rendered without notifying or
 pinging the referenced user. Enable the **Message Content Intent** in the
 Discord Developer Portal for edited-message content to be available.
 
-The commands are registered globally automatically when the bot connects, so
-they are available in every server where the bot is installed. Discord may take
-up to an hour to propagate newly registered global commands.
+The Turkish-only command set is registered globally and directly in every server
+where this bot is installed when it connects. Direct server registration also
+removes stale commands left by an older deployment; the bot ignores any
+unexpected command that is still in Discord's cache. Startup also verifies that
+`TURKISH_TOKEN` belongs to the configured Turkish application before registering
+commands, so a United bot token cannot be used accidentally.
 
 ## Run continuously with systemd or `service`
 
@@ -96,7 +97,7 @@ sudo git clone https://github.com/iancodes0/FlightMaker.git /opt/flightmaker
 sudo chown -R flightmaker:flightmaker /opt/flightmaker
 sudo -u flightmaker npm --prefix /opt/flightmaker ci --omit=dev
 
-sudo sh -c 'printf "DISCORD_TOKEN=%s\n" "your-bot-token-here" > /etc/flightmaker/flightmaker.env'
+sudo sh -c 'printf "TURKISH_TOKEN=%s\n" "your-turkish-bot-token-here" > /etc/flightmaker/flightmaker.env'
 sudo chmod 600 /etc/flightmaker/flightmaker.env
 sudo cp /opt/flightmaker/deploy/flightmaker.service /etc/systemd/system/flightmaker.service
 sudo systemctl daemon-reload
@@ -117,7 +118,6 @@ Keep the token in `/etc/flightmaker/flightmaker.env`; do not commit it to Git.
 
 1. Create a Railway project from this repository.
 2. Add the variable `TURKISH_TOKEN` in the service's **Variables** settings.
-   `DISCORD_TOKEN` remains supported as a fallback for older deployments.
 3. Deploy the service. Railway uses [`railway.json`](railway.json) and runs `npm start`.
 
 The service is configured to restart after failed exits. Railway's local filesystem is

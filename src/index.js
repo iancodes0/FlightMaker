@@ -24,10 +24,11 @@ const {
   TextInputStyle,
 } = require("discord.js");
 
-const token = process.env.TURKISH_TOKEN || process.env.DISCORD_TOKEN;
+const token = process.env.TURKISH_TOKEN;
+const expectedApplicationId = process.env.DISCORD_CLIENT_ID || "1568375825445822654";
 
 if (!token) {
-  console.error("Missing TURKISH_TOKEN or DISCORD_TOKEN. Add one to the service variables before starting the bot.");
+  console.error("Missing TURKISH_TOKEN. Add the Turkish bot token to the service variables before starting the bot.");
   process.exit(1);
 }
 
@@ -358,6 +359,17 @@ const removePilotFlightCommand = new SlashCommandBuilder()
   .addStringOption((option) =>
     option.setName("code").setDescription("The code from your flight plan.").setRequired(true)
   );
+
+const TURKISH_COMMANDS = [
+  new SlashCommandBuilder()
+    .setName("about")
+    .setDescription("Learn about Turkish Airlines PTFS."),
+  flightPlanCommand,
+  logFlightCommand,
+  pilotCommand,
+  removePilotFlightCommand,
+];
+const TURKISH_COMMAND_NAMES = new Set(TURKISH_COMMANDS.map((command) => command.name));
 
 const ROLE_COMMAND_AUTHORIZED_USER_IDS = new Set([
   "1420191498988814377",
@@ -691,22 +703,28 @@ const createTicket = async (interaction) => {
 
 client.once(Events.ClientReady, (readyClient) => {
   console.log(`Logged in as ${readyClient.user.tag}`);
-  // No guild ID means these commands are registered globally.
-  readyClient.application.commands
-    .set([
-      new SlashCommandBuilder()
-        .setName("about")
-        .setDescription("Learn about Turkish Airlines PTFS.")
-        .toJSON(),
-      flightPlanCommand.toJSON(),
-      logFlightCommand.toJSON(),
-      pilotCommand.toJSON(),
-      removePilotFlightCommand.toJSON(),
-    ])
-    .then(() =>
-      console.log("Registered global commands: /about, /flightplan, /logflight, /pilot, /removeflight.")
-    )
-    .catch((error) => console.error("Failed to register slash commands:", error));
+  if (readyClient.user.id !== expectedApplicationId) {
+    console.error(
+      `Refusing to start: TURKISH_TOKEN belongs to ${readyClient.user.id}, ` +
+        `but the configured Turkish application is ${expectedApplicationId}.`
+    );
+    readyClient.destroy();
+    process.exitCode = 1;
+    return;
+  }
+
+  const commandData = TURKISH_COMMANDS.map((command) => command.toJSON());
+  Promise.all([
+    readyClient.application.commands.set(commandData),
+    ...readyClient.guilds.cache.values().map((guild) => guild.commands.set(commandData)),
+  ])
+    .then(() => {
+      console.log(
+        `Registered Turkish-only commands in ${readyClient.guilds.cache.size} guild(s): ` +
+          "/about, /flightplan, /logflight, /pilot, /removeflight."
+      );
+    })
+    .catch((error) => console.error("Failed to register Turkish-only slash commands:", error));
   ensureTicketPanel().catch((error) => {
     console.error(`Failed to configure the ticket panel in channel ${TICKET_PANEL_CHANNEL_ID}:`, error);
   });
@@ -736,6 +754,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 
   try {
+  if (!TURKISH_COMMAND_NAMES.has(interaction.commandName)) {
+    await interaction.reply({
+      content: "That command is not available on the Turkish Airlines PTFS bot.",
+      ephemeral: true,
+    });
+    console.warn(`Ignored unregistered command /${interaction.commandName} for ${interaction.user.tag}.`);
+    return;
+  }
+
   if (interaction.commandName === "announce" || interaction.commandName === "announce2") {
     const flight = {
       code: generateFlightCode(),
@@ -1453,6 +1480,6 @@ process.once("SIGINT", () => void shutdown("SIGINT"));
 process.once("SIGTERM", () => void shutdown("SIGTERM"));
 
 client.login(token).catch((error) => {
-  console.error("Failed to log in to Discord. Check DISCORD_TOKEN and bot configuration:", error);
+  console.error("Failed to log in to Discord. Check TURKISH_TOKEN and bot configuration:", error);
   process.exit(1);
 });

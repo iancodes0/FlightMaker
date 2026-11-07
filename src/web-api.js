@@ -18,7 +18,7 @@ const STAFF_IDS = new Set([
 ]);
 const SESSION_SECRET = process.env.SESSION_SECRET;
 const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
-const DISCORD_BOT_TOKEN = process.env.TURKISH_TOKEN || process.env.DISCORD_TOKEN;
+const TURKISH_BOT_TOKEN = process.env.TURKISH_TOKEN;
 const DATA_FILE = path.join(__dirname, "..", "data", "website.json");
 
 const readData = () => {
@@ -90,9 +90,9 @@ const requestJson = async (url, options) => {
 };
 
 const sendDiscordMessage = async (userId, content) => {
-  if (!DISCORD_BOT_TOKEN) throw new Error("Discord bot token is not configured.");
+  if (!TURKISH_BOT_TOKEN) throw new Error("Turkish bot token is not configured.");
   const headers = {
-    Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+    Authorization: `Bot ${TURKISH_BOT_TOKEN}`,
     "Content-Type": "application/json",
   };
   const channel = await requestJson("https://discord.com/api/v10/users/@me/channels", {
