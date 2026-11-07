@@ -19,6 +19,7 @@ const {
   SlashCommandBuilder,
   ActionRowBuilder,
   ModalBuilder,
+  Partials,
   TextInputBuilder,
   TextInputStyle,
 } = require("discord.js");
@@ -33,6 +34,7 @@ if (!token) {
 const FLIGHTS_FILE = path.join(__dirname, "..", "data", "flights.json");
 const PILOTS_FILE = path.join(__dirname, "..", "data", "pilots.json");
 const WELCOME_CHANNEL_ID = "1568359911425974513";
+const MOD_LOG_CHANNEL_ID = "1568381814064545792";
 const TICKET_PANEL_CHANNEL_ID = process.env.TICKET_PANEL_CHANNEL_ID || "1567000517283020844";
 const WELCOME_LOGO_FILE = path.join(
   __dirname,
@@ -572,8 +574,39 @@ const eventModal = () =>
     );
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMembers,
+    GatewayIntentBits.GuildModeration,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildMessageReactions,
+    GatewayIntentBits.MessageContent,
+  ],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction],
 });
+
+const moderationLog = async (guild, title, description, color = 0xc8102e) => {
+  if (!guild) return;
+  try {
+    const channel = await client.channels.fetch(MOD_LOG_CHANNEL_ID);
+    if (!channel?.isTextBased()) {
+      throw new Error(`Moderation log channel ${MOD_LOG_CHANNEL_ID} is not text-based.`);
+    }
+    await channel.send({
+      embeds: [
+        new EmbedBuilder()
+          .setColor(color)
+          .setTitle(title)
+          .setDescription(description.slice(0, 4000))
+          .setFooter({ text: guild.name })
+          .setTimestamp(),
+      ],
+      allowedMentions: { parse: [] },
+    });
+  } catch (error) {
+    console.error(`Failed to write moderation log for ${guild.name}:`, error);
+  }
+};
 
 const createTicket = async (interaction) => {
   if (!interaction.guild) {
@@ -1240,6 +1273,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 client.on(Events.GuildMemberAdd, async (member) => {
+  await moderationLog(
+    member.guild,
+    "Member joined",
+    `<@${member.id}> joined the server.\nUser ID: \`${member.id}\``,
+    0x2ecc71
+  );
+
   if (member.user.bot) {
     return;
   }
@@ -1276,6 +1316,103 @@ client.on(Events.GuildMemberAdd, async (member) => {
   } catch (error) {
     console.error(`Failed to welcome ${member.user.tag} in ${member.guild.name}:`, error);
   }
+});
+
+client.on(Events.GuildMemberRemove, async (member) => {
+  await moderationLog(
+    member.guild,
+    "Member left",
+    `<@${member.id}> left the server.\nUser ID: \`${member.id}\``,
+    0xe67e22
+  );
+});
+
+client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
+  const addedRoles = newMember.roles.cache.filter((role) => !oldMember.roles.cache.has(role.id));
+  const removedRoles = oldMember.roles.cache.filter((role) => !newMember.roles.cache.has(role.id));
+  const verifiedRoleChanged = [...addedRoles.values(), ...removedRoles.values()].some((role) =>
+    role.name.toLowerCase().includes("verif")
+  );
+
+  if (addedRoles.size) {
+    await moderationLog(
+      newMember.guild,
+      verifiedRoleChanged ? "Member verified" : "Role added",
+      `<@${newMember.id}> received: ${addedRoles.map((role) => `**${role.name}**`).join(", ")}`,
+      0x3498db
+    );
+  }
+  if (removedRoles.size) {
+    await moderationLog(
+      newMember.guild,
+      verifiedRoleChanged ? "Verification role removed" : "Role removed",
+      `<@${newMember.id}> lost: ${removedRoles.map((role) => `**${role.name}**`).join(", ")}`,
+      0xe67e22
+    );
+  }
+});
+
+client.on(Events.MessageDelete, async (message) => {
+  if (!message.guild || message.author?.bot) return;
+  await moderationLog(
+    message.guild,
+    "Message deleted",
+    `Author: ${message.author ? `<@${message.author.id}>` : "Unknown user"}\nChannel: <#${message.channelId}>\nContent: ${message.content || "Unavailable (message was not cached)."}`,
+    0xe74c3c
+  );
+});
+
+client.on(Events.MessageUpdate, async (oldMessage, newMessage) => {
+  if (!newMessage.guild || newMessage.author?.bot) return;
+  if (oldMessage.content === newMessage.content) return;
+  await moderationLog(
+    newMessage.guild,
+    "Message edited",
+    `Author: ${newMessage.author ? `<@${newMessage.author.id}>` : "Unknown user"}\nChannel: <#${newMessage.channelId}>\nBefore: ${oldMessage.content || "Unavailable"}\nAfter: ${newMessage.content || "Unavailable"}`,
+    0xf1c40f
+  );
+});
+
+client.on(Events.MessageReactionAdd, async (reaction, user) => {
+  if (user.bot) return;
+  if (reaction.partial) await reaction.fetch().catch(() => null);
+  if (!reaction.message.guild) return;
+  await moderationLog(
+    reaction.message.guild,
+    "Reaction added",
+    `<@${user.id}> reacted with ${reaction.emoji} in <#${reaction.message.channelId}>.`,
+    0x9b59b6
+  );
+});
+
+client.on(Events.MessageReactionRemove, async (reaction, user) => {
+  if (user.bot) return;
+  if (reaction.partial) await reaction.fetch().catch(() => null);
+  if (!reaction.message.guild) return;
+  await moderationLog(
+    reaction.message.guild,
+    "Reaction removed",
+    `<@${user.id}> removed ${reaction.emoji} in <#${reaction.message.channelId}>.`,
+    0x8e44ad
+  );
+});
+
+client.on(Events.GuildBanAdd, async (ban) => {
+  await moderationLog(
+    ban.guild,
+    "Member banned",
+    `<@${ban.user.id}> was banned.\nReason: ${ban.reason || "No reason provided."}`,
+    0x992d22
+  );
+});
+
+client.on(Events.GuildBanRemove, async (ban) => {
+  await moderationLog(
+    ban.guild,
+    "Member unbanned",
+    `<@${ban.user.id}> was unbanned.`,
+    0x27ae60
+  );
 });
 
 client.on(Events.Error, (error) => {

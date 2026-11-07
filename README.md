@@ -66,6 +66,12 @@ Set `TICKET_PANEL_CHANNEL_ID` to a channel the bot can access if this default
 channel is unavailable. The bot will still start and all other commands will
 remain available when the panel channel cannot be accessed.
 
+Moderation logs are sent to channel `1568381814064545792`. They include member
+joins and leaves, role and verification changes, message deletions and edits,
+reactions, bans, and unbans. User references are rendered without notifying or
+pinging the referenced user. Enable the **Message Content Intent** in the
+Discord Developer Portal for edited-message content to be available.
+
 The commands are registered globally automatically when the bot connects, so
 they are available in every server where the bot is installed. Discord may take
 up to an hour to propagate newly registered global commands.
