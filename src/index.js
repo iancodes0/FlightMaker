@@ -735,6 +735,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     return;
   }
 
+  try {
   if (interaction.commandName === "announce" || interaction.commandName === "announce2") {
     const flight = {
       code: generateFlightCode(),
@@ -1154,6 +1155,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
     .setTimestamp();
 
   await interaction.reply({ embeds: [unitedEmbed] });
+  } catch (error) {
+    console.error(`Failed to handle /${interaction.commandName} for ${interaction.user.tag}:`, error);
+    const message = "I could not complete that command. Please try again.";
+    try {
+      if (interaction.replied || interaction.deferred) {
+        await interaction.editReply({ content: message, embeds: [] });
+      } else {
+        await interaction.reply({ content: message, ephemeral: true });
+      }
+    } catch (replyError) {
+      console.error(`Could not send error response for /${interaction.commandName}:`, replyError);
+    }
+  }
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
