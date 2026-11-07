@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#07090d">
+    <link rel="icon" type="image/png" href="assets/turkishairwaysptfs-favicon.png">
+    <title>My profile | Turkish Airlines PTFS</title>
+    <style>
+      :root { color-scheme: dark; --ink:#f3f6fa; --muted:#9da8b7; --line:rgba(195,207,222,.15); --panel:rgba(11,16,24,.82); --red:#c8102e; --cyan:#66e4ed; }
+      * { box-sizing:border-box; } body { margin:0; color:var(--ink); background:#07090d; font:15px/1.6 Inter,system-ui,sans-serif; }
+      .shell { width:min(940px,calc(100% - 32px)); margin:auto; } header { padding:22px 0; border-bottom:1px solid var(--line); }
+      nav { display:flex; justify-content:space-between; align-items:center; gap:18px; } a { color:inherit; text-decoration:none; }
+      .brand { display:flex; align-items:center; gap:10px; font-weight:800; } .brand img { width:38px; height:38px; border-radius:50%; background:#fff; }
+      .back { color:var(--cyan); } main { padding:76px 0; } .eyebrow { color:var(--cyan); text-transform:uppercase; letter-spacing:.15em; font-size:.75rem; font-weight:800; }
+      h1 { margin:12px 0; font-size:clamp(2.7rem,7vw,5.5rem); line-height:.92; letter-spacing:-.08em; } .intro,.muted { color:var(--muted); }
+      .panel { margin-top:28px; padding:22px; border:1px solid var(--line); border-radius:16px; background:var(--panel); }
+      .booking-list { display:grid; gap:12px; margin-top:18px; } .booking { padding:16px; border:1px solid var(--line); border-radius:12px; }
+      .booking strong,.booking span { display:block; } .booking span { color:var(--muted); font-size:.88rem; }
+      form { display:flex; gap:10px; margin-top:18px; } input { flex:1; min-width:0; padding:11px; border:1px solid var(--line); border-radius:9px; color:var(--ink); background:#0d141e; font:inherit; text-transform:uppercase; }
+      button { border:0; border-radius:9px; padding:10px 14px; color:#fff; background:var(--red); font-weight:800; cursor:pointer; } .notice { margin-top:14px; color:var(--muted); } .error { color:#ff7182; }
+      @media(max-width:600px){form{display:grid}button{width:100%}}
+    </style>
+  </head>
+  <body>
+    <header><div class="shell"><nav><a class="brand" href="./"><img src="assets/turkishairwaysptfs-logo.webp" alt="">Turkish Airlines PTFS</a><a class="back" href="./">← Home</a></nav></div></header>
+    <main class="shell">
+      <div class="eyebrow">Passenger profile</div><h1>My bookings.</h1><p id="intro" class="intro">View your flight requests and receive your boarding pass.</p>
+      <section class="panel"><h2>Receive your boarding pass</h2><p class="muted">Enter the booking code sent to your Discord DMs after you booked.</p><form id="pass-form"><input name="bookingCode" placeholder="FM-XXXXXXXX" maxlength="11" required><button>Receive boarding pass</button></form><p id="message" class="notice"></p></section>
+      <section class="panel"><h2>Booked flights</h2><div id="booking-list" class="booking-list"><p class="muted">Loading...</p></div></section>
+    </main>
+    <script src="assets/site.js"></script><script>
+      const list = document.querySelector("#booking-list"), form = document.querySelector("#pass-form"), message = document.querySelector("#message");
+      const escapeHtml = (value) => String(value).replace(/[&<>"']/g, (char) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[char]));
+      const render = (bookings) => { list.innerHTML = bookings.length ? bookings.map((booking) => `<article class="booking"><strong>${escapeHtml(booking.flightNumber)} · ${escapeHtml(booking.origin)} → ${escapeHtml(booking.destination)}</strong><span>${escapeHtml(booking.departure)} · ${escapeHtml(booking.aircraft)}</span><span>Status: ${booking.status === "completed" ? "Booking complete" : "Booking request received"}</span>${booking.boardingPass ? `<span>Boarding pass: ${escapeHtml(booking.boardingPass.passNumber)}</span>` : ""}</article>`).join("") : '<p class="muted">You have no bookings yet.</p>'; };
+      (async () => { const session = await ptfs.setupAuth(); if (!session) { window.location.href = ptfs.DISCORD_SIGN_IN_URL; return; } try { render((await ptfs.api("/api/bookings/me")).bookings); } catch (error) { list.innerHTML = `<p class="error">${escapeHtml(error.message)}</p>`; } })();
+      form.addEventListener("submit", async (event) => { event.preventDefault(); message.className = "notice"; message.textContent = ""; try { const result = await ptfs.api("/api/bookings/boarding-pass", { method:"POST", body:JSON.stringify(Object.fromEntries(new FormData(form))) }); message.textContent = result.message; render((await ptfs.api("/api/bookings/me")).bookings); form.reset(); } catch (error) { message.className = "notice error"; message.textContent = error.message; } });
+    </script>
+  </body>
+</html>

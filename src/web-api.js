@@ -17,6 +17,8 @@ const STAFF_IDS = new Set([
   "1537414223213109288",
 ]);
 const SESSION_SECRET = process.env.SESSION_SECRET;
+const SESSION_DURATION_MS = 30 * 24 * 60 * 60 * 1000;
+const DISCORD_BOT_TOKEN = process.env.TURKISH_TOKEN || process.env.DISCORD_TOKEN;
 const DATA_FILE = path.join(__dirname, "..", "data", "website.json");
 
 const readData = () => {
@@ -38,7 +40,7 @@ const send = (response, status, body, origin) => {
     "Content-Type": "application/json; charset=utf-8",
     "Access-Control-Allow-Origin": origin || "https://turkishairlinesptfs.github.io",
     "Access-Control-Allow-Headers": "Content-Type, X-Session-Token",
-    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
     Vary: "Origin",
   });
   response.end(JSON.stringify(body));
@@ -55,7 +57,7 @@ const encode = (value) => Buffer.from(JSON.stringify(value)).toString("base64url
 const sign = (value) => crypto.createHmac("sha256", SESSION_SECRET || "missing-secret").update(value).digest("base64url");
 
 const createSession = (user) => {
-  const payload = encode({ id: user.id, username: user.username, exp: Date.now() + 8 * 60 * 60 * 1000 });
+  const payload = encode({ id: user.id, username: user.username, exp: Date.now() + SESSION_DURATION_MS });
   return `${payload}.${sign(payload)}`;
 };
 
@@ -87,6 +89,46 @@ const requestJson = async (url, options) => {
   return body;
 };
 
+const sendDiscordMessage = async (userId, content) => {
+  if (!DISCORD_BOT_TOKEN) throw new Error("Discord bot token is not configured.");
+  const headers = {
+    Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+    "Content-Type": "application/json",
+  };
+  const channel = await requestJson("https://discord.com/api/v10/users/@me/channels", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ recipient_id: userId }),
+  });
+  await requestJson(`https://discord.com/api/v10/channels/${channel.id}/messages`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ content }),
+  });
+};
+
+const createBookingCode = (bookings) => {
+  let code;
+  do {
+    code = `FM-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
+  } while (bookings.some((booking) => booking.bookingCode === code));
+  return code;
+};
+
+const publicBooking = (booking) => ({
+  id: booking.id,
+  flightId: booking.flightId,
+  flightNumber: booking.flightNumber,
+  origin: booking.origin,
+  destination: booking.destination,
+  departure: booking.departure,
+  aircraft: booking.aircraft,
+  passengerName: booking.passengerName,
+  createdAt: booking.createdAt,
+  status: booking.status,
+  boardingPass: booking.boardingPass || null,
+});
+
 const server = http.createServer(async (request, response) => {
   const origin = request.headers.origin;
   if (origin && !ALLOWED_ORIGINS.has(origin)) return send(response, 403, { error: "Origin not allowed." }, origin);
@@ -110,6 +152,12 @@ const server = http.createServer(async (request, response) => {
           upcomingFlights: data.flights.filter((flight) => new Date(flight.departure).getTime() > Date.now()).length,
         },
       }, origin);
+    }
+    if (request.method === "GET" && url.pathname === "/api/bookings/me") {
+      const session = getSession(request);
+      if (!session) return send(response, 401, { error: "Sign in with Discord to view your bookings." }, origin);
+      const data = readData();
+      return send(response, 200, { bookings: data.bookings.filter((booking) => booking.discordId === session.id).map(publicBooking) }, origin);
     }
     if (request.method === "POST" && url.pathname === "/api/auth/exchange") {
       if (!CLIENT_SECRET) return send(response, 503, { error: "Discord OAuth is not configured on the server." }, origin);
@@ -151,17 +199,82 @@ const server = http.createServer(async (request, response) => {
       const data = readData();
       const flight = data.flights.find((item) => item.id === body.flightId);
       if (!flight) return send(response, 404, { error: "That flight is no longer available." }, origin);
-      data.bookings.push({
+      const booking = {
         id: crypto.randomUUID(),
         flightId: flight.id,
         flightNumber: flight.flightNumber,
+        origin: flight.origin,
+        destination: flight.destination,
+        departure: flight.departure,
+        aircraft: flight.aircraft,
         passengerName: String(body.passengerName).slice(0, 100),
         email: String(body.email).slice(0, 200),
         discordId: session.id,
+        bookingCode: createBookingCode(data.bookings),
+        status: "requested",
         createdAt: new Date().toISOString(),
-      });
+      };
+      data.bookings.push(booking);
       writeData(data);
-      return send(response, 201, { message: "Your booking request has been received." }, origin);
+      let dmSent = true;
+      try {
+        await sendDiscordMessage(
+          session.id,
+          [
+            `Your booking request for **${booking.flightNumber}** (${booking.origin} → ${booking.destination}) was received.`,
+            `Your booking code is **${booking.bookingCode}**.`,
+            "Enter this code on your profile page to receive your boarding pass.",
+          ].join("\n")
+        );
+      } catch (error) {
+        dmSent = false;
+        console.error(`Failed to DM booking code to Discord user ${session.id}:`, error);
+      }
+      return send(response, 201, {
+        message: dmSent
+          ? "Your booking request was received. Check your Discord DMs for your booking code."
+          : "Your booking request was received, but the Discord DM could not be sent.",
+        booking: publicBooking(booking),
+      }, origin);
+    }
+    if (request.method === "POST" && url.pathname === "/api/bookings/boarding-pass") {
+      const session = getSession(request);
+      if (!session) return send(response, 401, { error: "Sign in with Discord to receive your boarding pass." }, origin);
+      const body = await parseBody(request);
+      const bookingCode = String(body.bookingCode || "").trim().toUpperCase();
+      const data = readData();
+      const booking = data.bookings.find(
+        (item) => item.discordId === session.id && item.bookingCode === bookingCode
+      );
+      if (!booking) return send(response, 404, { error: "That booking code is invalid." }, origin);
+      if (booking.boardingPass) return send(response, 200, { booking: publicBooking(booking), alreadyIssued: true }, origin);
+      booking.status = "completed";
+      booking.boardingPass = {
+        passNumber: `BP-${crypto.randomBytes(4).toString("hex").toUpperCase()}`,
+        issuedAt: new Date().toISOString(),
+      };
+      writeData(data);
+      let dmSent = true;
+      try {
+        await sendDiscordMessage(
+          session.id,
+          [
+            `Your boarding pass for **${booking.flightNumber}** has been received.`,
+            `Route: **${booking.origin} → ${booking.destination}**`,
+            `Boarding pass: **${booking.boardingPass.passNumber}**`,
+            "Your booking is now complete.",
+          ].join("\n")
+        );
+      } catch (error) {
+        dmSent = false;
+        console.error(`Failed to DM boarding pass to Discord user ${session.id}:`, error);
+      }
+      return send(response, 200, {
+        booking: publicBooking(booking),
+        message: dmSent
+          ? "Boarding pass received. Check your Discord DMs."
+          : "Boarding pass received, but the Discord DM could not be sent.",
+      }, origin);
     }
     if (request.method === "POST" && url.pathname === "/api/flights") {
       const session = requireStaff(request);

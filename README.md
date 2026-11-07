@@ -6,9 +6,12 @@ The project website is available at
 [iancodes0.github.io/FlightMaker](https://iancodes0.github.io/FlightMaker/).
 
 The Turkish Airlines PTFS site includes a Discord sign-in flow, public flight
-booking page, and staff-only flight management page. Configure
+booking page, passenger profile with booking history and boarding-pass
+redemption, and staff-only flight management page. Configure
 `DISCORD_CLIENT_SECRET` and `SESSION_SECRET` in the Railway service variables
-before enabling bookings or staff access.
+before enabling bookings or staff access. The bot token (`TURKISH_TOKEN` or
+`DISCORD_TOKEN`) must also be configured so the website can DM users their
+booking codes and boarding-pass confirmations.
 
 ## Setup
 

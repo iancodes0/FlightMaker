@@ -63,7 +63,7 @@ const setupAuth = async () => {
       const username = document.createElement("span");
       username.textContent = session.user.username;
       button.append(avatar, username);
-      button.href = "#";
+      button.href = "./profile.html";
       button.setAttribute("aria-label", `Signed in as ${session.user.username}`);
       button.removeAttribute("role");
     } else {
