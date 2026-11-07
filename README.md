@@ -56,6 +56,7 @@ as `welcome-card.png`; no profile pictures are stored by the bot.
 - `/flightplan` — Creates a coded flight plan with departure, arrival, aircraft, and callsign details.
 - `/logflight` — Logs a completed flight using its plan code, proof picture, and required hours and minutes.
 - `/pilot` — Shows your recent completed flights and total flight time.
+- `/removeflight` — Removes your own active flight plan when its code matches.
 
 The bot also maintains a support-ticket panel in Discord channel
 `1567000517283020844`. Users can click **Create Support Ticket** to open one

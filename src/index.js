@@ -350,6 +350,13 @@ const pilotCommand = new SlashCommandBuilder()
   .setName("pilot")
   .setDescription("Show your recent flights and total flight time.");
 
+const removePilotFlightCommand = new SlashCommandBuilder()
+  .setName("removeflight")
+  .setDescription("Cancel your active flight plan.")
+  .addStringOption((option) =>
+    option.setName("code").setDescription("The code from your flight plan.").setRequired(true)
+  );
+
 const ROLE_COMMAND_AUTHORIZED_USER_IDS = new Set([
   "1420191498988814377",
   "1388554248144293919",
@@ -661,9 +668,10 @@ client.once(Events.ClientReady, (readyClient) => {
       flightPlanCommand.toJSON(),
       logFlightCommand.toJSON(),
       pilotCommand.toJSON(),
+      removePilotFlightCommand.toJSON(),
     ])
     .then(() =>
-      console.log("Registered global commands: /about, /flightplan, /logflight, /pilot.")
+      console.log("Registered global commands: /about, /flightplan, /logflight, /pilot, /removeflight.")
     )
     .catch((error) => console.error("Failed to register slash commands:", error));
   ensureTicketPanel().catch((error) => {
@@ -886,6 +894,35 @@ client.on(Events.InteractionCreate, async (interaction) => {
               : "No active flight plan",
           }),
       ],
+      ephemeral: true,
+    });
+    return;
+  }
+
+  if (interaction.commandName === "removeflight") {
+    const pilot = pilots[interaction.user.id];
+    if (!pilot?.activePlan) {
+      await interaction.reply({
+        content: "You do not have an active flight plan to remove.",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    const code = interaction.options.getString("code", true).trim().toUpperCase();
+    if (code !== pilot.activePlan.code) {
+      await interaction.reply({
+        content: "That flight plan code does not match your active flight plan.",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    const removedPlan = pilot.activePlan;
+    delete pilot.activePlan;
+    savePilots(pilots);
+    await interaction.reply({
+      content: `Your flight plan **${removedPlan.code}** for **${removedPlan.callsign}** was removed.`,
       ephemeral: true,
     });
     return;
