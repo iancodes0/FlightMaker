@@ -53,6 +53,9 @@ as `welcome-card.png`; no profile pictures are stored by the bot.
 ## Commands
 
 - `/about` — Explains Turkish Airlines PTFS and its goal of reflecting the spirit of the real airline.
+- `/flightplan` — Creates a coded flight plan with departure, arrival, aircraft, and callsign details.
+- `/logflight` — Logs a completed flight using its plan code, proof picture, and required hours and minutes.
+- `/pilot` — Shows your recent completed flights and total flight time.
 
 The bot also maintains a support-ticket panel in Discord channel
 `1567000517283020844`. Users can click **Create Support Ticket** to open one

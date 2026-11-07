@@ -31,6 +31,7 @@ if (!token) {
 }
 
 const FLIGHTS_FILE = path.join(__dirname, "..", "data", "flights.json");
+const PILOTS_FILE = path.join(__dirname, "..", "data", "pilots.json");
 const WELCOME_CHANNEL_ID = "1568359911425974513";
 const TICKET_PANEL_CHANNEL_ID = process.env.TICKET_PANEL_CHANNEL_ID || "1567000517283020844";
 const WELCOME_LOGO_FILE = path.join(
@@ -58,6 +59,32 @@ const saveFlights = (flights) => {
 };
 
 const flights = loadFlights();
+
+const loadPilots = () => {
+  try {
+    return JSON.parse(fs.readFileSync(PILOTS_FILE, "utf8"));
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return {};
+    }
+    throw error;
+  }
+};
+
+const savePilots = (pilots) => {
+  fs.mkdirSync(path.dirname(PILOTS_FILE), { recursive: true });
+  fs.writeFileSync(PILOTS_FILE, `${JSON.stringify(pilots, null, 2)}\n`);
+};
+
+const pilots = loadPilots();
+
+const generatePilotCode = () => {
+  let code;
+  do {
+    code = `TA-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  } while (Object.values(pilots).some((pilot) => pilot.activePlan?.code === code));
+  return code;
+};
 
 const generateFlightCode = () => {
   let code;
@@ -286,6 +313,42 @@ const giveRoleCommand = new SlashCommandBuilder()
   .addRoleOption((option) =>
     option.setName("role").setDescription("The role to give.").setRequired(true)
   );
+
+const flightPlanCommand = new SlashCommandBuilder()
+  .setName("flightplan")
+  .setDescription("Create a flight plan.")
+  .addStringOption((option) =>
+    option.setName("departure_airport").setDescription("The departure airport.").setRequired(true)
+  )
+  .addStringOption((option) =>
+    option.setName("arrival_airport").setDescription("The arrival airport.").setRequired(true)
+  )
+  .addStringOption((option) =>
+    option.setName("aircraft").setDescription("The aircraft type.").setRequired(true)
+  )
+  .addStringOption((option) =>
+    option.setName("callsign").setDescription("The flight callsign.").setRequired(true)
+  );
+
+const logFlightCommand = new SlashCommandBuilder()
+  .setName("logflight")
+  .setDescription("Log a completed flight from your active flight plan.")
+  .addStringOption((option) =>
+    option.setName("code").setDescription("The code from your flight plan.").setRequired(true)
+  )
+  .addAttachmentOption((option) =>
+    option.setName("picture").setDescription("A picture proving the completed flight.").setRequired(true)
+  )
+  .addIntegerOption((option) =>
+    option.setName("hours").setDescription("Completed flight hours.").setMinValue(0).setMaxValue(999).setRequired(true)
+  )
+  .addIntegerOption((option) =>
+    option.setName("minutes").setDescription("Additional flight minutes.").setMinValue(0).setMaxValue(59).setRequired(true)
+  );
+
+const pilotCommand = new SlashCommandBuilder()
+  .setName("pilot")
+  .setDescription("Show your recent flights and total flight time.");
 
 const ROLE_COMMAND_AUTHORIZED_USER_IDS = new Set([
   "1420191498988814377",
@@ -595,9 +658,12 @@ client.once(Events.ClientReady, (readyClient) => {
         .setName("about")
         .setDescription("Learn about Turkish Airlines PTFS.")
         .toJSON(),
+      flightPlanCommand.toJSON(),
+      logFlightCommand.toJSON(),
+      pilotCommand.toJSON(),
     ])
     .then(() =>
-      console.log("Registered global command: /about.")
+      console.log("Registered global commands: /about, /flightplan, /logflight, /pilot.")
     )
     .catch((error) => console.error("Failed to register slash commands:", error));
   ensureTicketPanel().catch((error) => {
@@ -676,6 +742,151 @@ client.on(Events.InteractionCreate, async (interaction) => {
           )
           .setFooter({ text: "Turkish Airlines PTFS • We fly together" }),
       ],
+    });
+    return;
+  }
+
+  if (interaction.commandName === "flightplan") {
+    const existingPilot = pilots[interaction.user.id];
+    if (existingPilot?.activePlan) {
+      await interaction.reply({
+        content: `You already have an active flight plan with code **${existingPilot.activePlan.code}**. Log that flight before creating another plan.`,
+        ephemeral: true,
+      });
+      return;
+    }
+
+    const plan = {
+      code: generatePilotCode(),
+      departureAirport: interaction.options.getString("departure_airport", true),
+      arrivalAirport: interaction.options.getString("arrival_airport", true),
+      aircraft: interaction.options.getString("aircraft", true),
+      callsign: interaction.options.getString("callsign", true),
+      createdAt: new Date().toISOString(),
+    };
+    pilots[interaction.user.id] = {
+      totalMinutes: existingPilot?.totalMinutes || 0,
+      recentFlights: existingPilot?.recentFlights || [],
+      activePlan: plan,
+    };
+    savePilots(pilots);
+    await interaction.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setColor(0xc8102e)
+          .setTitle("Flight plan created")
+          .setDescription(`Your flight plan code is **${plan.code}**. Use it with \`/logflight\` after completing the flight.`)
+          .addFields(
+            { name: "Departure", value: plan.departureAirport, inline: true },
+            { name: "Arrival", value: plan.arrivalAirport, inline: true },
+            { name: "Aircraft", value: plan.aircraft, inline: true },
+            { name: "Callsign", value: plan.callsign, inline: true }
+          )
+          .setFooter({ text: "Keep this code private until you log your flight." }),
+      ],
+      ephemeral: true,
+    });
+    return;
+  }
+
+  if (interaction.commandName === "logflight") {
+    const pilot = pilots[interaction.user.id];
+    if (!pilot?.activePlan) {
+      await interaction.reply({
+        content: "You do not have an active flight plan. Create one with `/flightplan` first.",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    const code = interaction.options.getString("code", true).trim().toUpperCase();
+    if (code !== pilot.activePlan.code) {
+      await interaction.reply({
+        content: "That flight plan code does not match your active flight plan.",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    const picture = interaction.options.getAttachment("picture", true);
+    if (!picture.contentType?.startsWith("image/")) {
+      await interaction.reply({
+        content: "The picture option must be an image attachment.",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    const hours = interaction.options.getInteger("hours", true);
+    const minutes = interaction.options.getInteger("minutes", true);
+    const flightMinutes = hours * 60 + minutes;
+    if (flightMinutes < 1) {
+      await interaction.reply({
+        content: "The logged flight time must be at least one minute.",
+        ephemeral: true,
+      });
+      return;
+    }
+
+    const loggedFlight = {
+      ...pilot.activePlan,
+      hours,
+      minutes,
+      proofUrl: picture.url,
+      loggedAt: new Date().toISOString(),
+    };
+    pilot.totalMinutes += flightMinutes;
+    pilot.recentFlights = [loggedFlight, ...(pilot.recentFlights || [])].slice(0, 10);
+    delete pilot.activePlan;
+    savePilots(pilots);
+    await interaction.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setColor(0xc8102e)
+          .setTitle("Flight logged")
+          .setDescription(`Your flight on **${loggedFlight.callsign}** has been added to your pilot record.`)
+          .addFields(
+            { name: "Route", value: `${loggedFlight.departureAirport} → ${loggedFlight.arrivalAirport}`, inline: false },
+            { name: "Aircraft", value: loggedFlight.aircraft, inline: true },
+            { name: "Flight time", value: `${hours}h ${minutes}m`, inline: true },
+            { name: "Total flight time", value: `${Math.floor(pilot.totalMinutes / 60)}h ${pilot.totalMinutes % 60}m`, inline: true }
+          )
+          .setImage(picture.url),
+      ],
+      ephemeral: true,
+    });
+    return;
+  }
+
+  if (interaction.commandName === "pilot") {
+    const pilot = pilots[interaction.user.id];
+    const recentFlights = pilot?.recentFlights || [];
+    const totalMinutes = pilot?.totalMinutes || 0;
+    const recentDescription = recentFlights.length
+      ? recentFlights
+          .slice(0, 5)
+          .map(
+            (flight) =>
+              `**${flight.callsign}** · ${flight.departureAirport} → ${flight.arrivalAirport} · ${flight.hours}h ${flight.minutes}m`
+          )
+          .join("\n")
+      : "No completed flights yet.";
+    await interaction.reply({
+      embeds: [
+        new EmbedBuilder()
+          .setColor(0xc8102e)
+          .setTitle(`${interaction.user.username}'s pilot record`)
+          .addFields(
+            { name: "Total flight time", value: `${Math.floor(totalMinutes / 60)}h ${totalMinutes % 60}m`, inline: false },
+            { name: "Recent flights", value: recentDescription, inline: false }
+          )
+          .setFooter({
+            text: pilot?.activePlan
+              ? `Active flight plan: ${pilot.activePlan.code}`
+              : "No active flight plan",
+          }),
+      ],
+      ephemeral: true,
     });
     return;
   }
